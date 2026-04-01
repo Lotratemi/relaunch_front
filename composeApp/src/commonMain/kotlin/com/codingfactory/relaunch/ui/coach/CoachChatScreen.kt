@@ -89,7 +89,10 @@ fun CoachChatScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(vertical = 8.dp)
             ) {
-                items(messages) { msg -> ChatBubble(msg) }
+                if (!isConversationDone) {
+                    items(messages) { msg -> ChatBubble(msg) }
+                }
+
                 if (isConversationDone) {
                     item {
                         Spacer(Modifier.height(8.dp))
@@ -104,30 +107,42 @@ fun CoachChatScreen(
                     }
                 }
             }
-
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                OutlinedTextField(
-                    value = inputText,
-                    onValueChange = { inputText = it },
-                    placeholder = { Text("Parlez d'un de vos problèmes à notre coach", fontSize = 13.sp) },
-                    shape = RoundedCornerShape(24.dp),
-                    modifier = Modifier.weight(1f),
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFFDDDDDD),
-                        unfocusedBorderColor = Color(0xFFDDDDDD)
-                    )
-                )
-                Spacer(Modifier.width(8.dp))
-                Box(
-                    modifier = Modifier.size(46.dp).clip(CircleShape).background(OrangeStart),
-                    contentAlignment = Alignment.Center
+            if (!isConversationDone) {
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = { sendMessage() }) {
-                        Icon(imageVector = Icons.Default.Send, contentDescription = "Envoyer", tint = Color.White, modifier = Modifier.size(20.dp))
+                    OutlinedTextField(
+                        value = inputText,
+                        onValueChange = { inputText = it },
+                        placeholder = {
+                            Text(
+                                "Parlez d'un de vos problèmes à notre coach",
+                                fontSize = 13.sp
+                            )
+                        },
+                        shape = RoundedCornerShape(24.dp),
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFFDDDDDD),
+                            unfocusedBorderColor = Color(0xFFDDDDDD)
+                        )
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Box(
+                        modifier = Modifier.size(46.dp).clip(CircleShape).background(OrangeStart),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        IconButton(onClick = { sendMessage() }) {
+                            Icon(
+                                imageVector = Icons.Default.Send,
+                                contentDescription = "Envoyer",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 }
             }
