@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.codingfactory.relaunch.ui.theme.OrangeStart
 
 @Composable
 internal fun ChatBubble(message: ChatMessage) {
@@ -21,7 +22,7 @@ internal fun ChatBubble(message: ChatMessage) {
             Box(
                 modifier = Modifier
                     .widthIn(max = 260.dp)
-                    .border(1.dp, Color(0xFFDDDDDD), RoundedCornerShape(20.dp))
+                    .background(OrangeStart), RoundedCornerShape(20.dp))
                     .padding(horizontal = 16.dp, vertical = 10.dp)
             ) {
                 Text(message.text, fontSize = 14.sp, color = Color.Black)
