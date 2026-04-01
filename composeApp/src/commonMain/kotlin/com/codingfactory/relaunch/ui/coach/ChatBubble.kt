@@ -22,7 +22,7 @@ internal fun ChatBubble(message: ChatMessage) {
             Box(
                 modifier = Modifier
                     .widthIn(max = 260.dp)
-                    .background(OrangeStart), RoundedCornerShape(20.dp))
+                    .background(OrangeStart, RoundedCornerShape(20.dp))
                     .padding(horizontal = 16.dp, vertical = 10.dp)
             ) {
                 Text(message.text, fontSize = 14.sp, color = Color.Black)
