@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,7 +32,8 @@ fun DashboardScreen(userName: String = "Philippe") {
 
     var selectedId by remember { mutableStateOf<Int?>(null) }
     var expandedMenuId by remember { mutableStateOf<Int?>(null) }
-    val trackedDays = remember { setOf(7, 8, 9, 10, 11, 12, 13, 14) }
+    val trackedDays = remember { setOf(7, 8, 9, 10, 11, 12, 13, 17) }
+    val wrongTrackedDays = remember { setOf(6, 14, 15, 16,) }
 
     Scaffold(
         containerColor = AppBackground,
@@ -70,7 +72,8 @@ fun DashboardScreen(userName: String = "Philippe") {
                     )
                 }
                 Spacer(Modifier.width(12.dp))
-                Text("🚀", fontSize = 26.sp)
+                Icon(imageVector = Icons.Default.RocketLaunch , contentDescription = "Launch Rocket", tint = TextPrimary )
+                // Text("🚀", fontSize = 26.sp)
             }
 
             Spacer(Modifier.height(28.dp))
@@ -134,7 +137,7 @@ fun DashboardScreen(userName: String = "Philippe") {
             Text(text = "Mon suivi", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(12.dp))
 
-            CalendarView(month = 4, year = 2026, trackedDays = trackedDays)
+            CalendarView(month = 4, year = 2026, trackedDays = trackedDays, wrongTrackedDays = wrongTrackedDays)
 
             Spacer(Modifier.height(24.dp))
         }

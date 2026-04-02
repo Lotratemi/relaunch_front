@@ -17,18 +17,13 @@ import androidx.compose.ui.unit.sp
 import com.codingfactory.relaunch.ui.theme.*
 
 @Composable
-internal fun CalendarView(month: Int, year: Int, trackedDays: Set<Int>) {
-    val dayHeaders = listOf("Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam")
+internal fun CalendarView(month: Int, year: Int, trackedDays: Set<Int>, wrongTrackedDays: Set<Int>) {
+    val dayHeaders = listOf("Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim")
     val firstDay = firstDayOfWeek(month, year)
     val totalDays = daysInMonth(month, year)
 
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, SurfaceVariant, RoundedCornerShape(16.dp))
-            .clip(RoundedCornerShape(16.dp))
-            .background(AppBackground)
-            .padding(12.dp)
+        modifier = Modifier.fillMaxWidth().border(1.dp, SurfaceVariant, RoundedCornerShape(16.dp)).clip(RoundedCornerShape(16.dp)).background(AppBackground).padding(12.dp)
     ) {
         Column {
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -54,10 +49,7 @@ internal fun CalendarView(month: Int, year: Int, trackedDays: Set<Int>) {
                     for (col in 0 until 7) {
                         val day = row * 7 + col - firstDay + 1
                         Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .aspectRatio(1f)
-                                .padding(2.dp),
+                            modifier = Modifier.weight(1f).aspectRatio(1f).padding(2.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             when {
@@ -72,10 +64,7 @@ internal fun CalendarView(month: Int, year: Int, trackedDays: Set<Int>) {
                                 }
                                 day in trackedDays -> {
                                     Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(brandGradient()),
+                                        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)).background(OrangeStart),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
@@ -87,10 +76,25 @@ internal fun CalendarView(month: Int, year: Int, trackedDays: Set<Int>) {
                                         )
                                     }
                                 }
+                                day in wrongTrackedDays -> {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)).background(RedEnd),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = day.toString(),
+                                            color = Color.White,
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+
+                                }
                                 else -> {
                                     Text(
                                         text = day.toString(),
-                                        color = TextPrimary,
+                                        color = Color.White,
                                         fontSize = 13.sp,
                                         textAlign = TextAlign.Center
                                     )
