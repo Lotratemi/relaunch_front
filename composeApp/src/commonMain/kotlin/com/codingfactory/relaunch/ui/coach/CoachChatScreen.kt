@@ -1,10 +1,15 @@
 package com.codingfactory.relaunch.ui.coach
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,8 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import com.codingfactory.relaunch.ui.theme.OrangeStart
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 data class ChatMessage(val text: String, val isUser: Boolean)
 
@@ -42,23 +50,48 @@ fun CoachChatScreen(
     val messages = remember { mutableStateListOf<ChatMessage>() }
     var inputText by remember { mutableStateOf("") }
     var responseStep by remember { mutableStateOf(0) }
+    var isTyping by remember { mutableStateOf(false) }
+    var isResponding by remember { mutableStateOf(false) }
+    var showConfirm by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
 
     val hasMessages = messages.isNotEmpty()
-    val isConversationDone = responseStep >= responses.size
 
-    LaunchedEffect(messages.size) {
-        if (messages.isNotEmpty()) listState.animateScrollToItem(messages.lastIndex)
+    val totalItems = messages.size + (if (isTyping) 1 else 0) + (if (showConfirm) 1 else 0)
+    LaunchedEffect(totalItems) {
+        if (totalItems > 0) listState.animateScrollToItem(totalItems - 1)
     }
 
     fun sendMessage() {
         val text = inputText.trim()
-        if (text.isBlank()) return
+        if (text.isBlank() || isResponding) return
         messages.add(ChatMessage(text, isUser = true))
         inputText = ""
         if (responseStep < responses.size) {
-            responses[responseStep].forEach { messages.add(ChatMessage(it, isUser = false)) }
+            val currentResponses = responses[responseStep]
+            val isLast = responseStep == responses.size - 1
             responseStep++
+            isResponding = true
+            scope.launch {
+                delay(600)
+                isTyping = true
+                delay(1200)
+                isTyping = false
+                messages.add(ChatMessage(currentResponses[0], isUser = false))
+                if (currentResponses.size > 1) {
+                    delay(500)
+                    isTyping = true
+                    delay(1000)
+                    isTyping = false
+                    messages.add(ChatMessage(currentResponses[1], isUser = false))
+                }
+                if (isLast) {
+                    delay(400)
+                    showConfirm = true
+                }
+                isResponding = false
+            }
         }
     }
 
@@ -85,23 +118,60 @@ fun CoachChatScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(vertical = 8.dp)
             ) {
-                    items(messages) { msg -> ChatBubble(msg) }
+                items(messages) { msg -> ChatBubble(msg) }
 
-                if (isConversationDone) {
+                if (isTyping) {
+                    item { TypingBubble() }
+                }
+
+                if (showConfirm) {
                     item {
                         Spacer(Modifier.height(8.dp))
-                        Button(
-                            onClick = onComplete,
+                        Column(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(24.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = OrangeStart)
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Text("Voir mon tableau de bord", color = Color.White, fontSize = 15.sp)
+                            Text(
+                                "Es-tu prêt(e) à découvrir ton tableau de bord ?",
+                                fontSize = 15.sp,
+                                color = Color.Black,
+                                textAlign = TextAlign.Center
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                OutlinedButton(
+                                    onClick = {},
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(24.dp),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFBBBBBB)),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Gray)
+                                ) {
+                                    Text("Non", fontSize = 15.sp)
+                                }
+                                Button(
+                                    onClick = onComplete,
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(24.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = OrangeStart)
+                                ) {
+                                    Text("Oui", color = Color.White, fontSize = 15.sp)
+                                }
+                            }
                         }
                     }
                 }
             }
-            if (!isConversationDone) {
+
+            AnimatedVisibility(
+                visible = responseStep < responses.size && !isResponding,
+                enter = fadeIn(animationSpec = tween(300)) + slideInVertically(
+                    animationSpec = tween(300),
+                    initialOffsetY = { it }
+                )
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 12.dp),
@@ -131,7 +201,7 @@ fun CoachChatScreen(
                     ) {
                         IconButton(onClick = { sendMessage() }) {
                             Icon(
-                                imageVector = Icons.Default.Send,
+                                imageVector = Icons.AutoMirrored.Filled.Send,
                                 contentDescription = "Envoyer",
                                 tint = Color.White,
                                 modifier = Modifier.size(20.dp)
