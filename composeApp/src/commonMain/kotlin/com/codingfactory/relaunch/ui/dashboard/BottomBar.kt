@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Person4
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable

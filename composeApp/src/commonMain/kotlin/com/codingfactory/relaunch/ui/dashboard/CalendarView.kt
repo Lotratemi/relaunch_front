@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.sp
 import com.codingfactory.relaunch.ui.theme.*
 
 @Composable
-internal fun CalendarView(month: Int, year: Int, trackedDays: Set<Int>, wrongTrackedDays: Set<Int>) {
+internal fun CalendarView(month: Int, year: Int, trackedDays: Set<Int>, wrongTrackedDays: Set<Int>, objectives: List<Objective>, today: Int = 18) {
     val dayHeaders = listOf("Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim")
     val firstDay = firstDayOfWeek(month, year)
     val totalDays = daysInMonth(month, year)
@@ -54,42 +54,31 @@ internal fun CalendarView(month: Int, year: Int, trackedDays: Set<Int>, wrongTra
                         ) {
                             when {
                                 day < 1 -> {}
-                                day > totalDays -> {
-                                    Text(
-                                        text = (day - totalDays).toString(),
-                                        color = TextMuted,
-                                        fontSize = 13.sp,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
-                                day in trackedDays -> {
+                                day > totalDays -> {}
+                                day == today -> {
+                                    val checkCount = objectives.count {it.isCheck}
+                                    val completionRatio = if (objectives.isEmpty()) 0f else checkCount.toFloat() / objectives.size
+
                                     Box(
-                                        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)).background(OrangeStart),
+                                        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Text(
-                                            text = day.toString(),
-                                            color = Color.White,
-                                            fontSize = 13.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            textAlign = TextAlign.Center
-                                        )
-                                    }
-                                }
-                                day in wrongTrackedDays -> {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)).background(RedEnd),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = day.toString(),
-                                            color = Color.White,
-                                            fontSize = 13.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            textAlign = TextAlign.Center
-                                        )
+                                        if (checkCount > 0){
+                                            Box(modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp))
+                                                .background(
+                                                    OrangeStart.copy(alpha = completionRatio.coerceAtLeast(0.2f))),
+                                            )
+                                        }
+                                        Text(text = day.toString(), color = Color.White, fontWeight = FontWeight.Normal)
+
                                     }
 
+                                }
+                                day in trackedDays -> {
+                                    DayBox(day, OrangeStart)
+                                }
+                                day in wrongTrackedDays -> {
+                                    DayBox(day, RedEnd)
                                 }
                                 else -> {
                                     Text(
@@ -112,6 +101,16 @@ internal fun firstDayOfWeek(month: Int, year: Int): Int {
     val t = intArrayOf(0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4)
     val y = if (month < 3) year - 1 else year
     return (y + y / 4 - y / 100 + y / 400 + t[month - 1] + 1) % 7
+}
+
+@Composable
+fun DayBox(day: Int, color: Color) {
+    Box(
+        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)).background(color),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = day.toString(), color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+    }
 }
 
 internal fun daysInMonth(month: Int, year: Int): Int = when (month) {
