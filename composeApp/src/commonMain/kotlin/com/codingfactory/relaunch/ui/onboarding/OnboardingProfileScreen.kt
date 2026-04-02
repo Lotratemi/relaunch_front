@@ -1,5 +1,6 @@
 package com.codingfactory.relaunch.ui.onboarding
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,9 +19,12 @@ import androidx.compose.ui.unit.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OnboardingProfileScreen(
-    onValidate: (name: String, age: String, sex: String) -> Unit
+    viewModel: OnboardingViewModel,
+    isLoading: Boolean = false,
+    error: String? = null
 ) {
     var name by remember { mutableStateOf("") }
+    var mail by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
     var sex by remember { mutableStateOf("") }
     var sexExpanded by remember { mutableStateOf(false) }
@@ -37,20 +41,33 @@ fun OnboardingProfileScreen(
                 Text(text = "Bienvenue sur", fontSize = 28.sp, color = Color.Black)
                 Text(text = "Relaunch", fontSize = 36.sp, fontWeight = FontWeight.Bold, color = Color.Black)
 
-                Spacer(Modifier.height(40.dp))
+                Spacer(Modifier.height(32.dp))
+
+                ProfileField(
+                    label = "Votre prénom",
+                    value = name,
+                    onValueChange = { name = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                    filter = { input -> input.filter { it.isLetter() || it == ' ' || it == '-' || it == '\'' } }
+                )
+
+                Spacer(Modifier.height(14.dp))
+
+                ProfileField(
+                    label = "Adresse e-mail",
+                    value = mail,
+                    onValueChange = { mail = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                )
+
+                Spacer(Modifier.height(14.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    ProfileField(
-                        label = "Votre prénom",
-                        value = name,
-                        onValueChange = { name = it },
-                        modifier = Modifier.weight(2f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                        filter = { input -> input.filter { it.isLetter() || it == ' ' || it == '-' || it == '\'' } }
-                    )
                     ProfileField(
                         label = "Âge",
                         value = age,
@@ -59,7 +76,7 @@ fun OnboardingProfileScreen(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         filter = { input -> input.filter { it.isDigit() }.take(3) }
                     )
-                    Column(modifier = Modifier.weight(1.3f)) {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text("Genre", fontSize = 11.sp, color = Color.Gray)
                         Spacer(Modifier.height(2.dp))
                         ExposedDropdownMenuBox(
@@ -110,16 +127,38 @@ fun OnboardingProfileScreen(
                     }
                 }
 
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(24.dp))
 
                 OutlinedButton(
-                    onClick = { if (name.isNotBlank()) onValidate(name, age, sex) },
+                    onClick = {
+                        if (name.isNotBlank() && mail.isNotBlank()) {
+                            viewModel.createUser(name, mail, age, sex)
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(24.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.Black),
+                    enabled = !isLoading,
+                    border = BorderStroke(1.dp, Color.Black),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)
                 ) {
-                    Text("Valider", fontSize = 16.sp)
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                            color = Color.Black
+                        )
+                    } else {
+                        Text("Valider", fontSize = 16.sp)
+                    }
+                }
+
+                if (error != null) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = error,
+                        fontSize = 12.sp,
+                        color = Color(0xFFFF3B30)
+                    )
                 }
             }
 
