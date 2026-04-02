@@ -4,13 +4,13 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,78 +21,28 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import com.codingfactory.relaunch.ui.theme.OrangeStart
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 data class ChatMessage(val text: String, val isUser: Boolean)
 
-private fun coachResponses(name: String) = listOf(
-    listOf(
-        "Ne t'inquiète pas $name, on va trouver une solution réalisable !",
-        "As tu déjà identifié le ou les éléments qui rabaissent ton moral ?"
-    ),
-    listOf(
-        "Je comprends. Le boulot c'est toujours un puit sans fond de fatigue.",
-        "À quelle heure te couches tu et à quelle heure te réveilles tu ?"
-    ),
-    listOf(
-        "Je vois le problème ! Un manque de sommeil peut tout dérégler.",
-        "Je te propose de commencer par te coucher à 22h. Je vais créer cet objectif pour toi !"
-    )
-)
-
 @Composable
 fun CoachChatScreen(
+    viewModel: CoachViewModel,
     userName: String,
     onComplete: () -> Unit
 ) {
-    val responses = remember(userName) { coachResponses(userName) }
-    val messages = remember { mutableStateListOf<ChatMessage>() }
+    val state by viewModel.uiState.collectAsState()
     var inputText by remember { mutableStateOf("") }
-    var responseStep by remember { mutableStateOf(0) }
-    var isTyping by remember { mutableStateOf(false) }
-    var isResponding by remember { mutableStateOf(false) }
-    var showConfirm by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
-    val scope = rememberCoroutineScope()
 
+    val messages = state.messages
     val hasMessages = messages.isNotEmpty()
+    val isTyping = state.isTyping
+    val isResponding = state.isResponding
+    val showConfirm = state.showConfirm
 
     val totalItems = messages.size + (if (isTyping) 1 else 0) + (if (showConfirm) 1 else 0)
     LaunchedEffect(totalItems) {
         if (totalItems > 0) listState.animateScrollToItem(totalItems - 1)
-    }
-
-    fun sendMessage() {
-        val text = inputText.trim()
-        if (text.isBlank() || isResponding) return
-        messages.add(ChatMessage(text, isUser = true))
-        inputText = ""
-        if (responseStep < responses.size) {
-            val currentResponses = responses[responseStep]
-            val isLast = responseStep == responses.size - 1
-            responseStep++
-            isResponding = true
-            scope.launch {
-                delay(600)
-                isTyping = true
-                delay(1200)
-                isTyping = false
-                messages.add(ChatMessage(currentResponses[0], isUser = false))
-                if (currentResponses.size > 1) {
-                    delay(500)
-                    isTyping = true
-                    delay(1000)
-                    isTyping = false
-                    messages.add(ChatMessage(currentResponses[1], isUser = false))
-                }
-                if (isLast) {
-                    delay(400)
-                    showConfirm = true
-                }
-                isResponding = false
-            }
-        }
     }
 
     Scaffold(containerColor = Color.White) { innerPadding ->
@@ -146,7 +96,7 @@ fun CoachChatScreen(
                                     onClick = {},
                                     modifier = Modifier.weight(1f),
                                     shape = RoundedCornerShape(24.dp),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFBBBBBB)),
+                                    border = BorderStroke(1.dp, Color(0xFFBBBBBB)),
                                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Gray)
                                 ) {
                                     Text("Non", fontSize = 15.sp)
@@ -166,7 +116,7 @@ fun CoachChatScreen(
             }
 
             AnimatedVisibility(
-                visible = responseStep < responses.size && !isResponding,
+                visible = viewModel.canShowInput() && !isResponding,
                 enter = fadeIn(animationSpec = tween(300)) + slideInVertically(
                     animationSpec = tween(300),
                     initialOffsetY = { it }
@@ -199,7 +149,10 @@ fun CoachChatScreen(
                         modifier = Modifier.size(46.dp).clip(CircleShape).background(OrangeStart),
                         contentAlignment = Alignment.Center
                     ) {
-                        IconButton(onClick = { sendMessage() }) {
+                        IconButton(onClick = {
+                            viewModel.sendMessage(inputText)
+                            inputText = ""
+                        }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.Send,
                                 contentDescription = "Envoyer",
