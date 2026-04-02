@@ -1,7 +1,6 @@
 package com.codingfactory.relaunch
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import kotlin.test.*
 
 class ComposeAppCommonTest {
 
