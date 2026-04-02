@@ -89,9 +89,7 @@ fun CoachChatScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(vertical = 8.dp)
             ) {
-                if (!isConversationDone) {
                     items(messages) { msg -> ChatBubble(msg) }
-                }
 
                 if (isConversationDone) {
                     item {
