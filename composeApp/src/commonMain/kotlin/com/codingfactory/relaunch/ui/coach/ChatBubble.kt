@@ -25,7 +25,7 @@ internal fun ChatBubble(message: ChatMessage) {
                     .background(OrangeStart, RoundedCornerShape(20.dp))
                     .padding(horizontal = 16.dp, vertical = 10.dp)
             ) {
-                Text(message.text, fontSize = 14.sp, color = Color.Black)
+                Text(message.text, fontSize = 14.sp, color = Color.White)
             }
         } else {
             Box(
