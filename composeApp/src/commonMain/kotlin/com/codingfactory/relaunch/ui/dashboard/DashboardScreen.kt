@@ -62,7 +62,6 @@ fun DashboardScreen(userName: String = "") {
         ) {
             Spacer(Modifier.height(16.dp))
 
-            Text(text = "Dashboard", color = TextSecondary, fontSize = 14.sp)
             Spacer(Modifier.height(4.dp))
             Text(text = "Relaunch", color = TextPrimary, fontSize = 34.sp, fontWeight = FontWeight.Bold)
             Text(text = "Tu peux le faire $userName !", color = TextPrimary, fontSize = 16.sp)

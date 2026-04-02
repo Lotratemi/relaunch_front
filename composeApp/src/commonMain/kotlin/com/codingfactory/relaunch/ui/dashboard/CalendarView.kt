@@ -68,7 +68,7 @@ internal fun CalendarView(month: Int, year: Int, trackedDays: Set<Int>, wrongTra
                                                     OrangeStart.copy(alpha = completionRatio.coerceAtLeast(0.2f))),
                                             )
                                         }
-                                        Text(text = day.toString(), color = Color.White, fontWeight = FontWeight.Normal)
+                                        Text(text = day.toString(), color = if (checkCount > 0) Color.White else TextPrimary, fontWeight = FontWeight.Normal)
 
                                     }
 
@@ -82,7 +82,7 @@ internal fun CalendarView(month: Int, year: Int, trackedDays: Set<Int>, wrongTra
                                 else -> {
                                     Text(
                                         text = day.toString(),
-                                        color = Color.White,
+                                        color = TextPrimary,
                                         fontSize = 13.sp,
                                         textAlign = TextAlign.Center
                                     )
