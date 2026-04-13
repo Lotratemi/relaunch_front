@@ -6,7 +6,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 object ApiClient {
-    var baseUrl: String = "http://10.0.2.2:31337"
+    var baseUrl: String = "http://10.0.2.2:8080"
 
     val httpClient by lazy {
         HttpClient {
