@@ -1,6 +1,7 @@
 package com.codingfactory.relaunch.data.repository
 
 import com.codingfactory.relaunch.data.api.ApiService
+import com.codingfactory.relaunch.data.model.CoachConversationDto
 import com.codingfactory.relaunch.data.model.ConversationDto
 import com.codingfactory.relaunch.data.model.MessageDto
 import com.codingfactory.relaunch.data.model.ObjectiveDto
@@ -9,6 +10,18 @@ class CoachRepository(private val api: ApiService) {
 
     suspend fun createConversation(userId: Long): Result<ConversationDto> = runCatching {
         api.createConversation(ConversationDto(userId = userId))
+    }
+
+    suspend fun startCoachConversation(userId: Long): Result<CoachConversationDto> = runCatching {
+        api.startCoachConversation(userId)
+    }
+
+    suspend fun sendCoachMessage(
+        userId: Long,
+        mistralConvId: String,
+        message: String
+    ): Result<String> = runCatching {
+        api.sendCoachMessage(userId, mistralConvId, message)
     }
 
     suspend fun saveMessage(

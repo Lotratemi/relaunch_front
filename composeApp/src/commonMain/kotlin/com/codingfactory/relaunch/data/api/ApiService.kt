@@ -1,5 +1,6 @@
 package com.codingfactory.relaunch.data.api
 
+import com.codingfactory.relaunch.data.model.CoachConversationDto
 import com.codingfactory.relaunch.data.model.ConversationDto
 import com.codingfactory.relaunch.data.model.MessageDto
 import com.codingfactory.relaunch.data.model.ObjectiveDto
@@ -13,6 +14,7 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
@@ -89,6 +91,21 @@ class ApiService(private val client: HttpClient, private val baseUrl: String) {
     suspend fun deleteObjective(id: Long) {
         client.delete("$baseUrl/objectives/$id")
     }
+
+    // ── Coach (Mistral AI) ──
+
+    suspend fun startCoachConversation(userId: Long): CoachConversationDto =
+        client.post("$baseUrl/coach/chat/$userId").body()
+
+    suspend fun sendCoachMessage(
+        userId: Long,
+        mistralConvId: String,
+        message: String
+    ): String =
+        client.post("$baseUrl/coach/chat/$userId/$mistralConvId") {
+            contentType(ContentType.Text.Plain)
+            setBody(message)
+        }.bodyAsText()
 
     // ── Streaks ──
 
