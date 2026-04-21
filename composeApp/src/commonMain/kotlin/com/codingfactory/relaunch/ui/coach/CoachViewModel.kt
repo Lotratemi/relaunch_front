@@ -26,111 +26,111 @@ class CoachViewModel(
 
     private val coachRepo = CoachRepository(ApiClient.apiService)
     private var conversationId: Long? = null
-    private var responseStep = 0
+    private var mistralConvId: String? = null
+    private var turn = 0
 
-    private val responses = listOf(
-        listOf(
-            "Ne t'inquiète pas $userName, on va trouver une solution réalisable !",
-            "As tu déjà identifié le ou les éléments qui rabaissent ton moral ?"
-        ),
-        listOf(
-            "Je comprends. Le boulot c'est toujours un puit sans fond de fatigue.",
-            "À quelle heure te couches tu et à quelle heure te réveilles tu ?"
-        ),
-        listOf(
-            "Je vois le problème ! Un manque de sommeil peut tout dérégler.",
-            "Je te propose de commencer par te coucher à 22h. Je vais créer cet objectif pour toi !"
-        )
-    )
+    val totalResponses: Int = MAX_TURNS
 
-    val totalResponses: Int = responses.size
-
-    private val _uiState = MutableStateFlow(CoachUiState())
+    private val _uiState = MutableStateFlow(CoachUiState(isResponding = true, inputEnabled = false))
     val uiState: StateFlow<CoachUiState> = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            coachRepo.createConversation(userId).onSuccess {
-                conversationId = it.id
-            }
+            coachRepo.startCoachConversation(userId)
+                .onSuccess {
+                    conversationId = it.id
+                    mistralConvId = it.mistralConvId
+                    _uiState.update { s -> s.copy(isResponding = false, inputEnabled = true) }
+                }
+                .onFailure {
+                    _uiState.update { s ->
+                        s.copy(
+                            isResponding = false,
+                            inputEnabled = false,
+                            messages = s.messages + ChatMessage(
+                                "Désolé $userName, je n'arrive pas à démarrer la conversation. Réessaie plus tard.",
+                                isUser = false
+                            )
+                        )
+                    }
+                }
         }
     }
 
     fun sendMessage(text: String) {
         val trimmed = text.trim()
+        val convId = mistralConvId ?: return
         if (trimmed.isBlank() || _uiState.value.isResponding) return
+        if (turn >= MAX_TURNS) return
 
         val userMsg = ChatMessage(trimmed, isUser = true)
-        _uiState.update { it.copy(messages = it.messages + userMsg) }
+        _uiState.update {
+            it.copy(
+                messages = it.messages + userMsg,
+                isResponding = true,
+                isTyping = true,
+                inputEnabled = false
+            )
+        }
 
-        // Persist user message
         viewModelScope.launch {
-            conversationId?.let { id ->
-                coachRepo.saveMessage(id, trimmed, isUser = true)
-            }
-        }
+            conversationId?.let { id -> coachRepo.saveMessage(id, trimmed, isUser = true) }
 
-        if (responseStep < responses.size) {
-            val currentResponses = responses[responseStep]
-            val isLast = responseStep == responses.size - 1
-            responseStep++
-            _uiState.update { it.copy(isResponding = true, inputEnabled = false) }
+            coachRepo.sendCoachMessage(userId, convId, trimmed)
+                .onSuccess { reply ->
+                    val content = reply.ifBlank { "…" }
+                    turn++
+                    val isLast = turn >= MAX_TURNS
+                    _uiState.update {
+                        it.copy(
+                            messages = it.messages + ChatMessage(content, isUser = false),
+                            isTyping = false,
+                            isResponding = false,
+                            inputEnabled = !isLast
+                        )
+                    }
+                    conversationId?.let { id -> coachRepo.saveMessage(id, content, isUser = false) }
 
-            viewModelScope.launch {
-                delay(600)
-                _uiState.update { it.copy(isTyping = true) }
-                delay(1200)
-                _uiState.update { it.copy(isTyping = false) }
-
-                val msg1 = ChatMessage(currentResponses[0], isUser = false)
-                _uiState.update { it.copy(messages = it.messages + msg1) }
-                persistCoachMessage(currentResponses[0])
-
-                if (currentResponses.size > 1) {
-                    delay(500)
-                    _uiState.update { it.copy(isTyping = true) }
-                    delay(1000)
-                    _uiState.update { it.copy(isTyping = false) }
-
-                    val msg2 = ChatMessage(currentResponses[1], isUser = false)
-                    _uiState.update { it.copy(messages = it.messages + msg2) }
-                    persistCoachMessage(currentResponses[1])
+                    if (isLast) {
+                        delay(400)
+                        finishConversation()
+                    }
                 }
-
-                if (isLast) {
-                    delay(400)
-                    _uiState.update { it.copy(showConfirm = true) }
-                    saveObjectives()
+                .onFailure {
+                    _uiState.update {
+                        it.copy(
+                            messages = it.messages + ChatMessage(
+                                "Désolé, une erreur est survenue. Réessaie.",
+                                isUser = false
+                            ),
+                            isTyping = false,
+                            isResponding = false,
+                            inputEnabled = true
+                        )
+                    }
                 }
-
-                _uiState.update {
-                    it.copy(
-                        isResponding = false,
-                        inputEnabled = responseStep < responses.size
-                    )
-                }
-            }
         }
     }
 
-    fun canShowInput(): Boolean = responseStep < responses.size
+    fun canShowInput(): Boolean = turn < MAX_TURNS && !_uiState.value.showConfirm
 
-    private suspend fun persistCoachMessage(content: String) {
-        conversationId?.let { id ->
-            coachRepo.saveMessage(id, content, isUser = false)
+    private fun finishConversation() {
+        if (_uiState.value.showConfirm) return
+        _uiState.update { it.copy(showConfirm = true, inputEnabled = false) }
+
+        viewModelScope.launch {
+            conversationId?.let { id -> coachRepo.markConversationDone(id, userId) }
+            val titles = listOf(
+                "Prendre sa douche (21h)",
+                "Se laver les dents (21h25)",
+                "Se mettre un réveil (21h30)",
+                "Se coucher plus tôt (22h)"
+            )
+            coachRepo.createObjectivesForUser(userId, titles)
         }
     }
 
-    private suspend fun saveObjectives() {
-        conversationId?.let { id ->
-            coachRepo.markConversationDone(id, userId)
-        }
-        val titles = listOf(
-            "Prendre sa douche (21h)",
-            "Se laver les dents (21h25)",
-            "Se mettre un réveil (21h30)",
-            "Se coucher plus tôt (22h)"
-        )
-        coachRepo.createObjectivesForUser(userId, titles)
+    companion object {
+        private const val MAX_TURNS = 3
     }
 }

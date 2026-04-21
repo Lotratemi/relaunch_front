@@ -23,6 +23,13 @@ data class ConversationDto(
 )
 
 @Serializable
+data class CoachConversationDto(
+    val id: Long? = null,
+    @SerialName("user_id") val userId: Long,
+    @SerialName("mistral_conv_id") val mistralConvId: String
+)
+
+@Serializable
 data class MessageDto(
     val id: Long? = null,
     @SerialName("conversation_id") val conversationId: Long,
