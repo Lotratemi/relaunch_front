@@ -8,8 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.codingfactory.relaunch.ui.theme.*
@@ -44,7 +43,7 @@ fun ProgressBar(objectives: List<Objective>, modifier: Modifier = Modifier) {
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .fillMaxWidth(animatedProgress) // Utilise la valeur animée
+                    .fillMaxWidth(animatedProgress)
                     .clip(RoundedCornerShape(9.dp))
                     .background(brandGradient())
             )
