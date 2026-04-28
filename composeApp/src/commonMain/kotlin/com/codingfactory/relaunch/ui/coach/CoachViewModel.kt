@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codingfactory.relaunch.data.api.ApiClient
 import com.codingfactory.relaunch.data.repository.CoachRepository
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,11 +24,8 @@ class CoachViewModel(
 ) : ViewModel() {
 
     private val coachRepo = CoachRepository(ApiClient.apiService)
-    private var conversationId: Long? = null
     private var mistralConvId: String? = null
-    private var turn = 0
-
-    val totalResponses: Int = MAX_TURNS
+    private var pendingObjectives: List<String> = emptyList()
 
     private val _uiState = MutableStateFlow(CoachUiState(isResponding = true, inputEnabled = false))
     val uiState: StateFlow<CoachUiState> = _uiState.asStateFlow()
@@ -38,7 +34,6 @@ class CoachViewModel(
         viewModelScope.launch {
             coachRepo.startCoachConversation(userId)
                 .onSuccess {
-                    conversationId = it.id
                     mistralConvId = it.mistralConvId
                     _uiState.update { s -> s.copy(isResponding = false, inputEnabled = true) }
                 }
@@ -61,7 +56,7 @@ class CoachViewModel(
         val trimmed = text.trim()
         val convId = mistralConvId ?: return
         if (trimmed.isBlank() || _uiState.value.isResponding) return
-        if (turn >= MAX_TURNS) return
+        if (_uiState.value.showConfirm) return
 
         val userMsg = ChatMessage(trimmed, isUser = true)
         _uiState.update {
@@ -74,26 +69,22 @@ class CoachViewModel(
         }
 
         viewModelScope.launch {
-            conversationId?.let { id -> coachRepo.saveMessage(id, trimmed, isUser = true) }
-
             coachRepo.sendCoachMessage(userId, convId, trimmed)
                 .onSuccess { reply ->
-                    val content = reply.ifBlank { "…" }
-                    turn++
-                    val isLast = turn >= MAX_TURNS
+                    val content = reply.response.ifBlank { "…" }
+                    if (reply.objectives.isNotEmpty()) {
+                        pendingObjectives = reply.objectives
+                    }
+                    val confirm = reply.objectivesCreationTrigger && pendingObjectives.isNotEmpty()
+
                     _uiState.update {
                         it.copy(
                             messages = it.messages + ChatMessage(content, isUser = false),
                             isTyping = false,
                             isResponding = false,
-                            inputEnabled = !isLast
+                            inputEnabled = !confirm,
+                            showConfirm = confirm
                         )
-                    }
-                    conversationId?.let { id -> coachRepo.saveMessage(id, content, isUser = false) }
-
-                    if (isLast) {
-                        delay(400)
-                        finishConversation()
                     }
                 }
                 .onFailure {
@@ -112,25 +103,19 @@ class CoachViewModel(
         }
     }
 
-    fun canShowInput(): Boolean = turn < MAX_TURNS && !_uiState.value.showConfirm
+    fun canShowInput(): Boolean = !_uiState.value.showConfirm
 
-    private fun finishConversation() {
-        if (_uiState.value.showConfirm) return
-        _uiState.update { it.copy(showConfirm = true, inputEnabled = false) }
-
+    fun confirmObjectives(onDone: () -> Unit) {
         viewModelScope.launch {
-            conversationId?.let { id -> coachRepo.markConversationDone(id, userId) }
-            val titles = listOf(
-                "Prendre sa douche (21h)",
-                "Se laver les dents (21h25)",
-                "Se mettre un réveil (21h30)",
-                "Se coucher plus tôt (22h)"
-            )
-            coachRepo.createObjectivesForUser(userId, titles)
+            if (pendingObjectives.isNotEmpty()) {
+                coachRepo.createObjectivesForUser(userId, pendingObjectives)
+            }
+            onDone()
         }
     }
 
-    companion object {
-        private const val MAX_TURNS = 3
+    fun declineObjectives() {
+        pendingObjectives = emptyList()
+        _uiState.update { it.copy(showConfirm = false, inputEnabled = true) }
     }
 }

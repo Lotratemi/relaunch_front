@@ -1,6 +1,7 @@
 package com.codingfactory.relaunch.data.api
 
 import com.codingfactory.relaunch.data.model.CoachConversationDto
+import com.codingfactory.relaunch.data.model.CoachReplyDto
 import com.codingfactory.relaunch.data.model.ConversationDto
 import com.codingfactory.relaunch.data.model.MessageDto
 import com.codingfactory.relaunch.data.model.ObjectiveDto
@@ -14,7 +15,6 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
@@ -78,18 +78,16 @@ class ApiService(private val client: HttpClient, private val baseUrl: String) {
         }.body()
 
     suspend fun getObjectivesByUser(userId: Long): List<ObjectiveDto> =
-        client.get("$baseUrl/objectives") {
-            parameter("user_id", userId)
-        }.body()
+        client.get("$baseUrl/objectives/$userId").body()
 
-    suspend fun updateObjective(id: Long, objective: ObjectiveDto): ObjectiveDto =
-        client.put("$baseUrl/objectives/$id") {
+    suspend fun updateObjective(userId: Long, objectiveId: Long, objective: ObjectiveDto): ObjectiveDto =
+        client.put("$baseUrl/objectives/$userId/$objectiveId") {
             contentType(ContentType.Application.Json)
             setBody(objective)
         }.body()
 
-    suspend fun deleteObjective(id: Long) {
-        client.delete("$baseUrl/objectives/$id")
+    suspend fun deleteObjective(userId: Long, objectiveId: Long) {
+        client.delete("$baseUrl/objectives/$userId/$objectiveId")
     }
 
     // ── Coach (Mistral AI) ──
@@ -101,11 +99,11 @@ class ApiService(private val client: HttpClient, private val baseUrl: String) {
         userId: Long,
         mistralConvId: String,
         message: String
-    ): String =
+    ): CoachReplyDto =
         client.post("$baseUrl/coach/chat/$userId/$mistralConvId") {
             contentType(ContentType.Text.Plain)
             setBody(message)
-        }.bodyAsText()
+        }.body()
 
     // ── Streaks ──
 

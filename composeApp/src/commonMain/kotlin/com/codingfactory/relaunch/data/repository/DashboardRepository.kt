@@ -12,8 +12,8 @@ class DashboardRepository(private val api: ApiService) {
         api.getObjectivesByUser(userId)
     }
 
-    suspend fun deleteObjective(id: Long): Result<Unit> = runCatching {
-        api.deleteObjective(id)
+    suspend fun deleteObjective(userId: Long, objectiveId: Long): Result<Unit> = runCatching {
+        api.deleteObjective(userId, objectiveId)
     }
 
     suspend fun getStreaks(userId: Long): Result<List<StreakDto>> = runCatching {
