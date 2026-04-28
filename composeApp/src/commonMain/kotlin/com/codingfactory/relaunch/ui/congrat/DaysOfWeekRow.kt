@@ -22,7 +22,7 @@ fun DaysOfWeekRow() {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = day,
-                    color = RedEnd, // Gris clair
+                    color = TextPrimary,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -30,7 +30,7 @@ fun DaysOfWeekRow() {
                 Icon(
                     imageVector = Icons.Filled.CheckCircle,
                     contentDescription = "Validé",
-                    tint = OrangeStart, // Orange
+                    tint = OrangeStart,
                     modifier = Modifier.size(24.dp)
                 )
             }

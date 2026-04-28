@@ -28,12 +28,11 @@ fun CongratSuccesScreen(onContinueClick: () -> Unit) {
             verticalArrangement = Arrangement.Center
         ) {
 
-            // --- Zone Image (Avatar) ---
             Box(
                 modifier = Modifier
                     .size(200.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.2f)), // Effet de halo
+                    .background(Color.White.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
                 Text("Avatar ici", color = Color.White)
@@ -41,7 +40,6 @@ fun CongratSuccesScreen(onContinueClick: () -> Unit) {
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // --- Bulle de titre blanche ---
             Surface(
                 shape = RoundedCornerShape(50.dp),
                 color = Color.White,
@@ -59,7 +57,6 @@ fun CongratSuccesScreen(onContinueClick: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- Sous-titre ---
             Text(
                 text = "Tu as accompli tes objectifs !",
                 color = Color.White,
@@ -69,14 +66,12 @@ fun CongratSuccesScreen(onContinueClick: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(0.8f)
             )
 
-            // --- Les Jours de la Semaine ---
             Spacer(modifier = Modifier.height(24.dp))
 
             DaysOfWeekRow()
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            // --- Bouton Suivant ---
             Button(
                 onClick = onContinueClick,
                 modifier = Modifier

@@ -28,7 +28,6 @@ fun CongratFailScreen(onContinueClick: () -> Unit) {
             verticalArrangement = Arrangement.Center
         ) {
 
-            // --- Zone Image (Avatar) ---
             Box(
                 modifier = Modifier
                     .size(200.dp)
@@ -41,7 +40,6 @@ fun CongratFailScreen(onContinueClick: () -> Unit) {
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // --- Bulle de titre blanche ---
             Surface(
                 shape = RoundedCornerShape(50.dp),
                 color = Color.White,
@@ -59,7 +57,6 @@ fun CongratFailScreen(onContinueClick: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- Sous-titre ---
             Text(
                 text = "Tu es sur la bonne voie !\n" + "Tu te rapproches de ton objectif ! !",
                 color = Color.White,
@@ -69,7 +66,6 @@ fun CongratFailScreen(onContinueClick: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(0.8f)
             )
 
-            // --- Bouton Suivant ---
             Button(
                 onClick = onContinueClick,
                 modifier = Modifier
