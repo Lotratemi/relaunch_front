@@ -2,6 +2,7 @@ package com.codingfactory.relaunch.data.repository
 
 import com.codingfactory.relaunch.data.api.ApiService
 import com.codingfactory.relaunch.data.model.CoachConversationDto
+import com.codingfactory.relaunch.data.model.CoachReplyDto
 import com.codingfactory.relaunch.data.model.ConversationDto
 import com.codingfactory.relaunch.data.model.MessageDto
 import com.codingfactory.relaunch.data.model.ObjectiveDto
@@ -20,7 +21,7 @@ class CoachRepository(private val api: ApiService) {
         userId: Long,
         mistralConvId: String,
         message: String
-    ): Result<String> = runCatching {
+    ): Result<CoachReplyDto> = runCatching {
         api.sendCoachMessage(userId, mistralConvId, message)
     }
 

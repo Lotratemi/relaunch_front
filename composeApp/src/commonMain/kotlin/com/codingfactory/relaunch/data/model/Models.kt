@@ -50,6 +50,13 @@ data class ObjectiveDto(
 )
 
 @Serializable
+data class CoachReplyDto(
+    val response: String,
+    @SerialName("objectives_creation_trigger") val objectivesCreationTrigger: Boolean,
+    val objectives: List<String> = emptyList()
+)
+
+@Serializable
 data class StreakDto(
     val id: Long? = null,
     @SerialName("user_id") val userId: Long,
