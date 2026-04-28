@@ -15,6 +15,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.*
+import com.codingfactory.relaunch.ui.theme.RedEnd
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,6 +32,7 @@ fun OnboardingProfileScreen(
     var showAutreDialog by remember { mutableStateOf(false) }
     var autreInput by remember { mutableStateOf("") }
     val sexOptions = listOf("Homme", "Femme", "Non-binaire", "Autre")
+    val isFormFilled = name.isNotBlank() && mail.isNotBlank() && age.isNotBlank() && sex.isNotBlank()
 
     Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -137,7 +139,7 @@ fun OnboardingProfileScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(24.dp),
-                    enabled = !isLoading,
+                    enabled = isFormFilled && !isLoading,
                     border = BorderStroke(1.dp, Color.Black),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)
                 ) {
@@ -153,13 +155,17 @@ fun OnboardingProfileScreen(
                 }
 
                 if (error != null) {
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = error,
-                        fontSize = 12.sp,
-                        color = Color(0xFFFF3B30)
-                    )
-                }
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFDAD4)),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = " !! : $error",
+                            modifier = Modifier.padding(16.dp),
+                            color = RedEnd,
+                            fontSize = 14.sp
+                        )
+                    }                }
             }
 
             BlobsDecoration(modifier = Modifier.fillMaxWidth().height(220.dp))
