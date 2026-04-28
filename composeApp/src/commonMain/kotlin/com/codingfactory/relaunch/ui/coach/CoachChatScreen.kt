@@ -41,7 +41,7 @@ fun CoachChatScreen(
     val showConfirm = state.showConfirm
 
     val totalItems = messages.size + (if (isTyping) 1 else 0) + (if (showConfirm) 1 else 0)
-    LaunchedEffect(totalItems) {
+    LaunchedEffect(messages.size, isTyping, showConfirm) {
         if (totalItems > 0) listState.animateScrollToItem(totalItems - 1)
     }
 
@@ -93,7 +93,7 @@ fun CoachChatScreen(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 OutlinedButton(
-                                    onClick = {},
+                                    onClick = { viewModel.declineObjectives() },
                                     modifier = Modifier.weight(1f),
                                     shape = RoundedCornerShape(24.dp),
                                     border = BorderStroke(1.dp, Color(0xFFBBBBBB)),
@@ -102,7 +102,7 @@ fun CoachChatScreen(
                                     Text("Non", fontSize = 15.sp)
                                 }
                                 Button(
-                                    onClick = onComplete,
+                                    onClick = { viewModel.confirmObjectives(onComplete) },
                                     modifier = Modifier.weight(1f),
                                     shape = RoundedCornerShape(24.dp),
                                     colors = ButtonDefaults.buttonColors(containerColor = OrangeStart)

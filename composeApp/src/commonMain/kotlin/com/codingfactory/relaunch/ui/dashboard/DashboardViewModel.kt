@@ -49,10 +49,9 @@ class DashboardViewModel(
                     }
                 },
                 onFailure = { e ->
-                    // Fallback to defaults if backend unreachable
                     _uiState.update {
                         it.copy(
-                            objectives = defaultObjectives(),
+                            objectives = emptyList(),
                             isLoading = false,
                             error = e.message
                         )
@@ -95,17 +94,10 @@ class DashboardViewModel(
     fun deleteObjective(index: Int) {
         val obj = _uiState.value.objectives.getOrNull(index) ?: return
         viewModelScope.launch {
-            dashboardRepo.deleteObjective(obj.id.toLong())
+            dashboardRepo.deleteObjective(userId, obj.id.toLong())
         }
         _uiState.update { state ->
             state.copy(objectives = state.objectives.toMutableList().also { it.removeAt(index) })
         }
     }
-
-    private fun defaultObjectives() = listOf(
-        Objective(id = 1, title = "Prendre sa douche (21h)"),
-        Objective(id = 2, title = "Se laver les dents (21h25)"),
-        Objective(id = 3, title = "Se mettre un réveil (21h30)"),
-        Objective(id = 4, title = "Se coucher plus tôt (22h)"),
-    )
 }
