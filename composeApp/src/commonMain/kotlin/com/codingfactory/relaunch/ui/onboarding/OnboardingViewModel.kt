@@ -3,13 +3,11 @@ package com.codingfactory.relaunch.ui.onboarding
 import androidx.lifecycle.*
 import com.codingfactory.relaunch.data.api.ApiClient
 import com.codingfactory.relaunch.data.repository.UserRepository
-import io.ktor.client.network.sockets.ConnectTimeoutException
-import io.ktor.client.network.sockets.SocketTimeoutException
+import io.ktor.client.network.sockets.*
 import io.ktor.client.plugins.HttpRequestTimeoutException
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.io.IOException
-
 
 data class OnboardingUiState(
     val isLoading: Boolean = false,
@@ -33,17 +31,17 @@ class OnboardingViewModel : ViewModel() {
         }
 
         val emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$".toRegex()
-        if (mail.isNotBlank() || !mail.matches(emailRegex)) {
+        if (mail.isBlank() || !mail.matches(emailRegex)) {
             _uiState.update { it.copy(error = "E-mail non valide") }
             return
         }
 
         val ageI = age.toIntOrNull()
-        if (ageI == null || ageI !in 1..120) {
+        if (age.isBlank() && ageI == null && ageI !in 1..120) {
             _uiState.update { it.copy(error = "Age non valide : (1-120)") }
         }
 
-        if (sex.isNotBlank()){
+        if (sex.isBlank()){
             _uiState.update { it.copy( error = "Selectionnez un genre") }
             return
         }
