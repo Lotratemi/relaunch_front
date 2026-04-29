@@ -2,10 +2,7 @@ package com.codingfactory.relaunch.data.api
 
 import com.codingfactory.relaunch.data.model.CoachConversationDto
 import com.codingfactory.relaunch.data.model.CoachReplyDto
-import com.codingfactory.relaunch.data.model.ConversationDto
-import com.codingfactory.relaunch.data.model.MessageDto
 import com.codingfactory.relaunch.data.model.ObjectiveDto
-import com.codingfactory.relaunch.data.model.StreakDto
 import com.codingfactory.relaunch.data.model.UserDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -35,38 +32,6 @@ class ApiService(private val client: HttpClient, private val baseUrl: String) {
         client.put("$baseUrl/users/$id") {
             contentType(ContentType.Application.Json)
             setBody(user)
-        }.body()
-
-    // ── Conversations ──
-
-    suspend fun createConversation(conversation: ConversationDto): ConversationDto =
-        client.post("$baseUrl/conversations") {
-            contentType(ContentType.Application.Json)
-            setBody(conversation)
-        }.body()
-
-    suspend fun getConversationsByUser(userId: Long): List<ConversationDto> =
-        client.get("$baseUrl/conversations") {
-            parameter("user_id", userId)
-        }.body()
-
-    suspend fun updateConversation(id: Long, conversation: ConversationDto): ConversationDto =
-        client.put("$baseUrl/conversations/$id") {
-            contentType(ContentType.Application.Json)
-            setBody(conversation)
-        }.body()
-
-    // ── Messages ──
-
-    suspend fun createMessage(message: MessageDto): MessageDto =
-        client.post("$baseUrl/messages") {
-            contentType(ContentType.Application.Json)
-            setBody(message)
-        }.body()
-
-    suspend fun getMessagesByConversation(conversationId: Long): List<MessageDto> =
-        client.get("$baseUrl/messages") {
-            parameter("conversation_id", conversationId)
         }.body()
 
     // ── Objectives ──
@@ -105,22 +70,4 @@ class ApiService(private val client: HttpClient, private val baseUrl: String) {
             setBody(message)
         }.body()
 
-    // ── Streaks ──
-
-    suspend fun createStreak(streak: StreakDto): StreakDto =
-        client.post("$baseUrl/streaks") {
-            contentType(ContentType.Application.Json)
-            setBody(streak)
-        }.body()
-
-    suspend fun getStreaksByUser(userId: Long): List<StreakDto> =
-        client.get("$baseUrl/streaks") {
-            parameter("user_id", userId)
-        }.body()
-
-    suspend fun updateStreak(id: Long, streak: StreakDto): StreakDto =
-        client.put("$baseUrl/streaks/$id") {
-            contentType(ContentType.Application.Json)
-            setBody(streak)
-        }.body()
 }

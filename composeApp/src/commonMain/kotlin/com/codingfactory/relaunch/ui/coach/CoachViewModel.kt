@@ -87,11 +87,11 @@ class CoachViewModel(
                         )
                     }
                 }
-                .onFailure {
+                .onFailure { err ->
                     _uiState.update {
                         it.copy(
                             messages = it.messages + ChatMessage(
-                                "Désolé, une erreur est survenue. Réessaie.",
+                                "Désolé, une erreur est survenue. Réessaie.\n[debug] ${err::class.simpleName}: ${err.message}",
                                 isUser = false
                             ),
                             isTyping = false,
