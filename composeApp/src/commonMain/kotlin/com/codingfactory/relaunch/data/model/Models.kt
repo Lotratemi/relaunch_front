@@ -63,3 +63,32 @@ data class StreakDto(
     val data: JsonArray,
     @SerialName("started_at") val startedAt: String? = null
 )
+
+@Serializable
+data class ProfilingRequestDto(
+    @SerialName("user_id") val userId: Long,
+    val answers: Map<Int, String>,
+    val version: Int = 1
+)
+
+@Serializable
+data class ProfileDimensionDto(
+    val dimension: String,
+    val score: Float,
+    val label: String
+)
+
+@Serializable
+data class UserProfileDto(
+    val id: Long? = null,
+    @SerialName("user_id") val userId: Long,
+    @SerialName("profile_type") val profileType: String,
+    @SerialName("raw_scores") val rawScores: String,
+    @SerialName("completed_at") val completedAt: String? = null
+)
+
+@Serializable
+data class ProfilingResponseDto(
+    val profile: UserProfileDto,
+    val dimensions: List<ProfileDimensionDto>
+)

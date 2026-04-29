@@ -15,8 +15,13 @@ import com.codingfactory.relaunch.ui.dashboard.DashboardScreen
 import com.codingfactory.relaunch.ui.dashboard.DashboardViewModel
 import com.codingfactory.relaunch.ui.onboarding.OnboardingProfileScreen
 import com.codingfactory.relaunch.ui.onboarding.OnboardingViewModel
+import com.codingfactory.relaunch.ui.onboarding.ProfilingInviteScreen
+import com.codingfactory.relaunch.ui.profiling.ProfilingResultScreen
+import com.codingfactory.relaunch.ui.profiling.ProfilingScreen
+import com.codingfactory.relaunch.ui.profiling.ProfilingViewModel
+import com.codingfactory.relaunch.data.model.ProfilingResponseDto
 
-private enum class AppScreen { ONBOARDING, COACH, DASHBOARD }
+private enum class AppScreen { ONBOARDING, PROFILING_INVITE, PROFILING, PROFILING_RESULT, COACH, DASHBOARD }
 
 @Composable
 fun App() {
@@ -24,6 +29,7 @@ fun App() {
         var screen by remember { mutableStateOf(AppScreen.ONBOARDING) }
         var userId by remember { mutableStateOf(0L) }
         var userName by remember { mutableStateOf("") }
+        var profilingResult by remember { mutableStateOf<ProfilingResponseDto?>(null) }
 
         when (screen) {
             AppScreen.ONBOARDING -> {
@@ -34,7 +40,7 @@ fun App() {
                     if (state.userId != null) {
                         userId = state.userId!!
                         userName = state.userName
-                        screen = AppScreen.COACH
+                        screen = AppScreen.PROFILING_INVITE
                     }
                 }
 
@@ -43,6 +49,44 @@ fun App() {
                     isLoading = state.isLoading,
                     error = state.error
                 )
+            }
+
+            AppScreen.PROFILING_INVITE -> {
+                ProfilingInviteScreen(
+                    userName = userName,
+                    onStartProfiling = { screen = AppScreen.PROFILING },
+                    onSkip = { screen = AppScreen.COACH }
+                )
+            }
+
+            AppScreen.PROFILING -> {
+                val viewModel = viewModel { ProfilingViewModel() }
+                val state by viewModel.uiState.collectAsState()
+
+                // ── quand résultat reçu → résultat screen ──
+                LaunchedEffect(state.result) {
+                    if (state.result != null) screen = AppScreen.PROFILING_RESULT
+                }
+
+                ProfilingScreen(
+                    viewModel = viewModel,
+                    userId = userId,
+                    isLoading = state.isLoading,
+                    error = state.error
+                )
+            }
+
+
+            AppScreen.PROFILING_RESULT -> {
+                val viewModel = viewModel { ProfilingViewModel() }
+                val state by viewModel.uiState.collectAsState()
+
+                state.result?.let { result ->
+                    ProfilingResultScreen(
+                        result = result,
+                        onStartCoaching = { screen = AppScreen.COACH }
+                    )
+                }
             }
 
             AppScreen.COACH -> {
