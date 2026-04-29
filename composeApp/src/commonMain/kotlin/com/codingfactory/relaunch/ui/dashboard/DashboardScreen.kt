@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -76,15 +77,14 @@ fun DashboardScreen(viewModel: DashboardViewModel) {
                                     .background(if (isChecked) Color.White else OrangeStart)
                             )
                             Spacer(Modifier.width(12.dp))
-                            Text(text = obj.title, color = TextPrimary, fontSize = 14.sp, modifier = Modifier.weight(1f))
+                            Text(text = obj.title, color = (if (isChecked) TextWhite else TextPrimary) , fontSize = 14.sp, modifier = Modifier.weight(1f))
                             Box {
                                 IconButton(onClick = { expandedMenuId = if (isMenuExpanded) null else obj.id }) {
-                                    Icon(imageVector = Icons.Default.MoreVert, contentDescription = "Options", tint = TextPrimary)
-                                }
-                                DropdownMenu(expanded = isMenuExpanded, onDismissRequest = { expandedMenuId = null }) {
+                                    Icon(imageVector = Icons.Default.MoreVert, contentDescription = "Options", tint = (if (isChecked) TextWhite else TextPrimary))                              }
+                                DropdownMenu(expanded = isMenuExpanded, onDismissRequest = { expandedMenuId = null }, containerColor = TextWhite) {
                                     DropdownMenuItem(text = { Text("Modifier") }, onClick = { expandedMenuId = null })
                                     DropdownMenuItem(
-                                        text = { Text("Supprimer", color = Color(0xFFFF3B30)) },
+                                        text = { Text("Supprimer", color = RedEnd ) },
                                         onClick = {
                                             expandedMenuId = null
                                             viewModel.deleteObjective(index)
