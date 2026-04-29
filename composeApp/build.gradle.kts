@@ -41,7 +41,6 @@ kotlin {
             implementation(libs.compose.material3)
             implementation(libs.compose.ui)
             implementation(libs.compose.components.resources)
-            implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(compose.materialIconsExtended)
@@ -51,6 +50,12 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+        }
+    }
+    sourceSets.all {
+        languageSettings {
+            languageVersion = "2.2"
+            apiVersion = "2.2"
         }
     }
 }
@@ -79,6 +84,18 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    // Désactiver le bug Lint Kotlin 2.2.0
+    lint {
+        disable += "NullSafeMutableLiveData"
+    }
+
+    configurations.all {
+        resolutionStrategy {
+            force("org.jetbrains.kotlin:kotlin-stdlib:2.2.0")
+            force("org.jetbrains.kotlin:kotlin-test:2.2.0")
+        }
     }
 }
 
