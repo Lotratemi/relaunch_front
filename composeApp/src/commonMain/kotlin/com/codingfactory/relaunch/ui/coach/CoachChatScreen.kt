@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import com.codingfactory.relaunch.ui.theme.OrangeStart
+import com.codingfactory.relaunch.ui.theme.TextPrimary
 
 data class ChatMessage(val text: String, val isUser: Boolean)
 
@@ -54,10 +55,10 @@ fun CoachChatScreen(
         ) {
             Column(modifier = Modifier.padding(horizontal = 24.dp).padding(top = 40.dp, bottom = 16.dp)) {
                 if (!hasMessages) {
-                    Text("Bienvenue sur", fontSize = 22.sp, color = Color.Black)
-                    Text("Relaunch", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                    Text("Bienvenue sur", fontSize = 22.sp, color = TextPrimary)
+                    Text("Relaunch", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
                 } else {
-                    Text("Votre Coach", fontSize = 26.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                    Text("Votre Coach", fontSize = 26.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
                     Text("Mettez en place votre premier objectif clé", fontSize = 14.sp, color = Color.Gray)
                 }
             }

@@ -2,8 +2,6 @@ package com.codingfactory.relaunch.data.api
 
 import com.codingfactory.relaunch.data.model.CoachConversationDto
 import com.codingfactory.relaunch.data.model.CoachReplyDto
-import com.codingfactory.relaunch.data.model.ConversationDto
-import com.codingfactory.relaunch.data.model.MessageDto
 import com.codingfactory.relaunch.data.model.ObjectiveDto
 import com.codingfactory.relaunch.data.model.ProfilingRequestDto
 import com.codingfactory.relaunch.data.model.ProfilingResponseDto
@@ -37,38 +35,6 @@ class ApiService(private val client: HttpClient, private val baseUrl: String) {
         client.put("$baseUrl/users/$id") {
             contentType(ContentType.Application.Json)
             setBody(user)
-        }.body()
-
-    // ── Conversations ──
-
-    suspend fun createConversation(conversation: ConversationDto): ConversationDto =
-        client.post("$baseUrl/conversations") {
-            contentType(ContentType.Application.Json)
-            setBody(conversation)
-        }.body()
-
-    suspend fun getConversationsByUser(userId: Long): List<ConversationDto> =
-        client.get("$baseUrl/conversations") {
-            parameter("user_id", userId)
-        }.body()
-
-    suspend fun updateConversation(id: Long, conversation: ConversationDto): ConversationDto =
-        client.put("$baseUrl/conversations/$id") {
-            contentType(ContentType.Application.Json)
-            setBody(conversation)
-        }.body()
-
-    // ── Messages ──
-
-    suspend fun createMessage(message: MessageDto): MessageDto =
-        client.post("$baseUrl/messages") {
-            contentType(ContentType.Application.Json)
-            setBody(message)
-        }.body()
-
-    suspend fun getMessagesByConversation(conversationId: Long): List<MessageDto> =
-        client.get("$baseUrl/messages") {
-            parameter("conversation_id", conversationId)
         }.body()
 
     // ── Objectives ──
