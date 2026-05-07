@@ -3,6 +3,9 @@ package com.codingfactory.relaunch.data.api
 import com.codingfactory.relaunch.data.model.CoachConversationDto
 import com.codingfactory.relaunch.data.model.CoachReplyDto
 import com.codingfactory.relaunch.data.model.ObjectiveDto
+import com.codingfactory.relaunch.data.model.ProfilingRequestDto
+import com.codingfactory.relaunch.data.model.ProfilingResponseDto
+import com.codingfactory.relaunch.data.model.StreakDto
 import com.codingfactory.relaunch.data.model.UserDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -70,4 +73,33 @@ class ApiService(private val client: HttpClient, private val baseUrl: String) {
             setBody(message)
         }.body()
 
-}
+    // ── Profiling ──
+
+    suspend fun analyzeProfiling(request: ProfilingRequestDto): ProfilingResponseDto =
+        client.post("$baseUrl/profiling") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+
+    suspend fun getLatestProfile(userId: Long): ProfilingResponseDto =
+        client.get("$baseUrl/profiling/$userId").body()
+
+
+    // ── Streaks ──
+
+    suspend fun createStreak(streak: StreakDto): StreakDto =
+        client.post("$baseUrl/streaks") {
+            contentType(ContentType.Application.Json)
+            setBody(streak)
+        }.body()
+
+    suspend fun getStreaksByUser(userId: Long): List<StreakDto> =
+        client.get("$baseUrl/streaks") {
+            parameter("user_id", userId)
+        }.body()
+
+    suspend fun updateStreak(id: Long, streak: StreakDto): StreakDto =
+        client.put("$baseUrl/streaks/$id") {
+            contentType(ContentType.Application.Json)
+            setBody(streak)
+        }.body()
