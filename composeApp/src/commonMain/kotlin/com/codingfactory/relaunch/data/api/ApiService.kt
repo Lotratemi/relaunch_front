@@ -48,7 +48,11 @@ class ApiService(private val client: HttpClient, private val baseUrl: String) {
     suspend fun getObjectivesByUser(userId: Long): List<ObjectiveDto> =
         client.get("$baseUrl/objectives/$userId").body()
 
-    suspend fun updateObjective(userId: Long, objectiveId: Long, objective: ObjectiveDto): ObjectiveDto =
+    suspend fun updateObjective(
+        userId: Long,
+        objectiveId: Long,
+        objective: ObjectiveDto
+    ): ObjectiveDto =
         client.put("$baseUrl/objectives/$userId/$objectiveId") {
             contentType(ContentType.Application.Json)
             setBody(objective)
@@ -103,3 +107,4 @@ class ApiService(private val client: HttpClient, private val baseUrl: String) {
             contentType(ContentType.Application.Json)
             setBody(streak)
         }.body()
+}
