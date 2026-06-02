@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relaunch — Ton coach IA personnel</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FDF6EE;
+    --surface: #FFFFFF;
+    --surface2: #FFF0E0;
+    --border: rgba(180,90,20,0.12);
+    --text: #2C1A0E;
+    --muted: rgba(44,26,14,0.5);
+    --accent: #E8620A;
+    --accent2: #F0A500;
+    --accent-glow: rgba(232,98,10,0.2);
+    --green: #C85A00;
+    --green-dim: rgba(200,90,0,0.1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #FFFAF5;
+    color: var(--text);
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ── NOISE TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 2.5rem;
+    background: rgba(253,246,238,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--accent), #F0A500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .nav-links { display: flex; gap: 2rem; align-items: center; }
+  .nav-links a {
+    font-size: 13.5px;
+    font-weight: 400;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--accent) !important;
+    color: white !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: 500 !important;
+    font-size: 13px !important;
+    transition: opacity 0.2s !important;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8rem 2rem 5rem;
+    position: relative;
+  }
+
+  .hero-glow {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(232,98,10,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-glow2 {
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(ellipse, rgba(240,165,0,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--green-dim);
+    border: 1px solid rgba(61,255,160,0.2);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+  .badge-dot {
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.8rem, 7vw, 5.5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 1;
+  }
+  .hero h1 .line2 {
+    background: linear-gradient(135deg, var(--accent) 30%, var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    color: var(--muted);
+    max-width: 520px;
+    margin: 0 auto 2.5rem;
+    font-weight: 300;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* WAITLIST FORM */
+  .waitlist-form {
+    display: flex;
+    gap: 0.6rem;
+    max-width: 420px;
+    margin: 0 auto 1rem;
+    position: relative;
+    z-index: 1;
+  }
+  .waitlist-form input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 18px;
+    font-size: 14px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .waitlist-form input::placeholder { color: var(--muted); }
+  .waitlist-form input:focus { border-color: var(--accent); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #9C7CFF);
+    border: none;
+    border-radius: 12px;
+    padding: 13px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Syne', sans-serif;
+    color: white;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.15s, opacity 0.15s;
+    letter-spacing: 0.01em;
+  }
+  .btn-primary:hover { transform: translateY(-1px); opacity: 0.92; }
+  .btn-primary:active { transform: translateY(0); }
+
+  .hero-hint {
+    font-size: 12px;
+    color: var(--muted);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* SOCIAL PROOF */
+  .social-proof {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 3rem;
+    position: relative;
+    z-index: 1;
+  }
+  .avatars { display: flex; }
+  .avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--bg);
+    margin-right: -8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Syne', sans-serif;
+  }
+  .av1 { background: #E8620A; }
+  .av2 { background: #F0A500; }
+  .av3 { background: #C85A00; color: white; }
+  .av4 { background: #FFD080; color: #2C1A0E; }
+  .social-text { font-size: 13px; color: var(--muted); margin-left: 0.5rem; }
+  .social-text strong { color: var(--text); }
+
+  /* ── SCROLL INDICATOR ── */
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    z-index: 1;
+    animation: bounce 2.5s infinite;
+  }
+  .scroll-hint::after {
+    content: '';
+    width: 1px;
+    height: 32px;
+    background: linear-gradient(to bottom, var(--muted), transparent);
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(6px); }
+  }
+
+  /* ── SECTION BASE ── */
+  section {
+    padding: 6rem 2rem;
+    position: relative;
+    z-index: 1;
+  }
+  .section-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .section-label {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 1rem;
+  }
+  .section-sub {
+    font-size: 1.05rem;
+    color: var(--muted);
+    max-width: 520px;
+    line-height: 1.7;
+  }
+
+  /* ── HOW IT WORKS ── */
+  #comment { background: #FFF3E8; border-top: 1px solid rgba(180,90,20,0.12); border-bottom: 1px solid rgba(180,90,20,0.12); }
+
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3.5rem;
+  }
+  .step-card {
+    background: #FFFAF5;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem;
+    position: relative;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .step-card:hover { border-color: rgba(232,98,10,0.35); transform: translateY(-3px); }
+  .step-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--accent), #F0A500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+    opacity: 0.7;
+  }
+  .step-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
+  .step-body { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+  /* ── FEATURES ── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-top: 3.5rem;
+  }
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem 1.75rem;
+    transition: border-color 0.2s;
+  }
+  .feature-card:hover { border-color: rgba(232,98,10,0.3); }
+  .feature-icon {
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+  .feature-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+  .feature-body { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+
+  /* FEATURE LARGE */
+  .feature-large {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    margin-top: 3.5rem;
+  }
+  @media (max-width: 700px) {
+    .feature-large { grid-template-columns: 1fr; gap: 2rem; }
+  }
+  .feature-visual {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+    aspect-ratio: 4/3;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-visual::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 60%;
+    background: radial-gradient(ellipse at 50% 0%, rgba(232,98,10,0.12), transparent 70%);
+  }
+  .chat-bubble {
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+    max-width: 85%;
+    line-height: 1.5;
+    position: relative;
+    z-index: 1;
+  }
+  .chat-user {
+    background: var(--accent);
+    color: white;
+    align-self: flex-end;
+    margin-left: auto;
+    border-bottom-right-radius: 4px;
+  }
+  .chat-ai {
+    background: #FFF0D8;
+    color: var(--text);
+    border-bottom-left-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  .chat-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .chat-label.ai { color: var(--accent); }
+  .chat-label.user { color: rgba(255,255,255,0.6); text-align: right; }
+
+  .feature-text-content { }
+  .feature-list {
+    list-style: none;
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .feature-list li {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    font-size: 14.5px;
+    color: var(--muted);
+  }
+  .feature-list li::before {
+    content: '→';
+    color: var(--accent);
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── TESTIMONIALS ── */
+  #temoignages { background: #FFF3E8; border-top: 1px solid rgba(180,90,20,0.12); border-bottom: 1px solid rgba(180,90,20,0.12); }
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+    margin-top: 3rem;
+  }
+  .testimonial {
+    background: #FFFAF5;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+  }
+  .testimonial-stars { color: #E8620A; font-size: 14px; margin-bottom: 0.75rem; letter-spacing: 2px; }
+  .testimonial-text { font-size: 14px; color: var(--muted); line-height: 1.65; font-style: italic; margin-bottom: 1rem; }
+  .testimonial-author { display: flex; align-items: center; gap: 0.75rem; }
+  .t-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; font-family: 'Syne', sans-serif;
+  }
+  .t-name { font-size: 13px; font-weight: 600; }
+  .t-role { font-size: 11.5px; color: var(--muted); }
+
+  /* ── CTA FINAL ── */
+  #rejoindre {
+    text-align: center;
+  }
+  .cta-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 4rem 3rem;
+    position: relative;
+    overflow: hidden;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .cta-box::before {
+    content: '';
+    position: absolute;
+    top: -100px; left: 50%; transform: translateX(-50%);
+    width: 400px; height: 300px;
+    background: radial-gradient(ellipse, rgba(232,98,10,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .cta-box h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+  }
+  .cta-box p {
+    color: var(--muted);
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+  .cta-form {
+    display: flex;
+    gap: 0.6rem;
+    max-width: 400px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  .cta-form input {
+    flex: 1;
+    background: #FFFAF5;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 18px;
+    font-size: 14px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .cta-form input::placeholder { color: var(--muted); }
+  .cta-form input:focus { border-color: var(--accent); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    position: relative;
+    z-index: 1;
+  }
+  footer .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    background: linear-gradient(135deg, var(--accent), #F0A500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  footer p { font-size: 12px; color: var(--muted); }
+  footer nav { display: flex; gap: 1.5rem; }
+  footer nav a { font-size: 12px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  footer nav a:hover { color: var(--text); }
+
+  /* ── SUCCESS STATE ── */
+  .success-msg {
+    display: none;
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 0.75rem;
+    text-align: center;
+  }
+
+  @media (max-width: 600px) {
+    nav { padding: 1rem 1.25rem; }
+    .nav-links { display: none; }
+    .waitlist-form, .cta-form { flex-direction: column; }
+    .cta-box { padding: 2.5rem 1.5rem; }
+    section { padding: 4rem 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Relaunch</div>
+  <div class="nav-links">
+    <a href="#comment">Comment ça marche</a>
+    <a href="#fonctionnalites">Fonctionnalités</a>
+    <a href="#temoignages">Témoignages</a>
+    <a href="#rejoindre" class="nav-cta">Rejoindre la liste</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+
+  <div class="hero-badge">
+    <span class="badge-dot"></span>
+    Bientôt disponible — Rejoins la liste d'attente
+  </div>
+
+  <h1>
+    Atteins tes objectifs.<br>
+    <span class="line2">Avec un coach qui<br>est toujours là pour toi!</span>
+  </h1>
+
+  <p class="hero-sub">
+    Relaunch utilise l'intelligence artificielle pour apprendre à te connaître, t'aide à définir ce que tu veux vraiment, puis t'accompagne chaque jour pour y arriver. Coaching personnalisé, encouragements et suivi — dans ta poche.
+  </p>
+
+  <div class="waitlist-form">
+    <input type="email" id="hero-email" placeholder="ton@email.com" />
+    <button class="btn-primary" onclick="handleSignup('hero-email', 'hero-success')">Je veux m'inscrire →</button>
+  </div>
+  <p class="success-msg" id="hero-success">🎉 Tu es sur la liste ! On te prévient en premier.</p>
+  <p class="hero-hint">Gratuit · Aucune carte bancaire · Disponible Android &amp; iOS</p>
+
+  <div class="social-proof">
+    <div class="avatars">
+      <div class="avatar av1">ML</div>
+      <div class="avatar av2">JR</div>
+      <div class="avatar av3">AS</div>
+      <div class="avatar av4">PK</div>
+    </div>
+    <span class="social-text"><strong>+240 personnes</strong> déjà sur la liste</span>
+  </div>
+
+  <div class="scroll-hint">Découvrir</div>
+</section>
+
+<!-- COMMENT ÇA MARCHE -->
+<section id="comment">
+  <div class="section-inner">
+    <span class="section-label">Comment ça marche</span>
+    <h2 class="section-title">Trois étapes pour<br>que tu t'épanouisses!</h2>
+    <p class="section-sub">Pas de méthode compliquée. Relaunch s'adapte à toi, pas l'inverse.</p>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-title">Tu parles, Relaunch écoute</div>
+        <p class="step-body">Dis à Relaunch ce que tu veux accomplir — même si c'est flou. L'IA t'aide à clarifier tes objectifs, les rendre concrets et les découper en étapes réalistes.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-title">Un plan fait pour toi</div>
+        <p class="step-body">Relaunch construit un parcours personnalisé selon ton niveau de motivation, ta disponibilité, ton rythme. Tout est adapté à ta situation!</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-title">Il te pousse à avancer</div>
+        <p class="step-body">Chaque jour, Relaunch suit ta progression, te félicite quand tu avances et te relance avec bienveillance quand tu décroches. Ton coach personnel, 24h/24.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FONCTIONNALITÉS -->
+<section id="fonctionnalites">
+  <div class="section-inner">
+    <span class="section-label">Fonctionnalités</span>
+    <h2 class="section-title">Tout ce qu'il te faut<br>pour ne plus abandonner</h2>
+
+    <div class="feature-large">
+      <div class="feature-visual">
+        <div>
+          <div class="chat-label user">Toi</div>
+          <div class="chat-bubble chat-user">Je veux me remettre au sport mais je sais pas par où commencer…</div>
+        </div>
+        <div>
+          <div class="chat-label ai">Relaunch</div>
+          <div class="chat-bubble chat-ai">C'est déjà un super premier pas d'en parler ! Dis-moi, tu as combien de temps par semaine ? On va construire quelque chose qui tient vraiment 💪</div>
+        </div>
+      </div>
+
+      <div class="feature-text-content">
+        <h3 class="section-title" style="font-size:1.7rem;">Une vraie conversation.</h3>
+        <p style="color:var(--muted); font-size:14.5px; margin-top:0.75rem; line-height:1.7;">Relaunch comprend ce que tu dis, même quand tu n'es pas sûr(e) de toi. L'IA reformule, questionne, et co-construit ton objectif avec toi — comme un vrai coach le ferait.</p>
+        <ul class="feature-list">
+          <li>Dialogue naturel en français</li>
+          <li>Reformulation et clarification des objectifs</li>
+          <li>Mémoire de tes préférences et de ton historique</li>
+          <li>Ton vocabulaire, ton rythme</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="features-grid" style="margin-top:2rem;">
+      <div class="feature-card">
+        <span class="feature-icon">📈</span>
+        <div class="feature-title">Suivi de progression</div>
+        <p class="feature-body">Visualise chaque étape franchie. Relaunch enregistre tes victoires — même les petites — pour te montrer le chemin parcouru.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🔔</span>
+        <div class="feature-title">Rappels intelligents</div>
+        <p class="feature-body">Pas de notifications intrusives. Relaunch te contacte au bon moment, avec le bon message — selon ta progression du moment.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🎯</span>
+        <div class="feature-title">Objectifs multiples</div>
+        <p class="feature-body">Sport, carrière, bien-être, apprentissage, se défaire d'addictions… Gère plusieurs objectifs en parallèle sans perdre le fil.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🔒</span>
+        <div class="feature-title">100 % privé</div>
+        <p class="feature-body">Tes échanges t'appartiennent. Aucune donnée vendue à des tiers. Tu peux tout supprimer à tout moment.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TÉMOIGNAGES -->
+<section id="temoignages">
+  <div class="section-inner">
+    <span class="section-label">Témoignages</span>
+    <h2 class="section-title">Ils ont testé Relaunch<br>en avant-première</h2>
+
+    <div class="testimonials-grid">
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"J'avais essayé des dizaines d'apps de suivi d'objectifs. Relaunch est la première où je me sens vraiment compris — pas juste coché dans une liste."</p>
+        <div class="testimonial-author">
+          <div class="t-avatar" style="background:#E8620A; color:white;">ML</div>
+          <div>
+            <div class="t-name">Alexandre P.</div>
+            <div class="t-role">Beta testeur · Etudiant</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"L'IA ne juge pas. Elle relance sans être chiante. En 3 semaines j'ai tenu un objectif que j'abandonnais toujours au bout de 5 jours."</p>
+        <div class="testimonial-author">
+          <div class="t-avatar" style="background:#F0A500; color:white;">JR</div>
+          <div>
+            <div class="t-name">Philippe D.</div>
+            <div class="t-role">Beta testeur · Reconversion pro</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★☆</div>
+        <p class="testimonial-text">"Ce que j'aime c'est que ça s'adapte à mes mauvaises semaines aussi. Relaunch ne m'a jamais fait sentir coupable de ne pas avoir avancé."</p>
+        <div class="testimonial-author">
+          <div class="t-avatar" style="background:#C85A00; color:#FFFFFF;">AS</div>
+          <div>
+            <div class="t-name">Malicia T.</div>
+            <div class="t-role">Beta testeuse · Apprentissage langue</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section id="rejoindre">
+  <div class="section-inner">
+    <div class="cta-box">
+      <h2>Prêt(e) à passer<br>à l'action ?</h2>
+      <p>Rejoins la liste d'attente maintenant.<br>Les premiers inscrits auront un accès prioritaire et gratuit.</p>
+      <div class="cta-form">
+        <input type="email" id="cta-email" placeholder="ton@email.com" />
+        <button class="btn-primary" onclick="handleSignup('cta-email', 'cta-success')">Je rejoins →</button>
+      </div>
+      <p class="success-msg" id="cta-success">🎉 Tu es sur la liste ! On te prévient en premier.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo">Relaunch</div>
+  <p>© 2025 Relaunch · Coaching IA · Tous droits réservés</p>
+  <nav>
+    <a href="#">Confidentialité</a>
+    <a href="#">CGU</a>
+    <a href="#">Contact</a>
+  </nav>
+</footer>
+
+<script>
+  function handleSignup(inputId, successId) {
+    const input = document.getElementById(inputId);
+    const success = document.getElementById(successId);
+    const email = input.value.trim();
+    if (!email || !email.includes('@')) {
+      input.style.borderColor = '#FC5C7D';
+      input.focus();
+      setTimeout(() => input.style.borderColor = '', 1500);
+      return;
+    }
+    input.parentElement.style.display = 'none';
+    success.style.display = 'block';
+  }
+
+  // Nav active highlight on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('nav a[href^="#"]');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(a => a.style.color = '');
+        const a = document.querySelector(`nav a[href="#${e.target.id}"]`);
+        if (a && !a.classList.contains('nav-cta')) a.style.color = '#F0EEF8';
+      }
+    });
+  }, { rootMargin: '-40% 0px -50% 0px' });
+  sections.forEach(s => io.observe(s));
+
+  // Smooth appear on scroll
+  const cards = document.querySelectorAll('.step-card, .feature-card, .testimonial');
+  const appear = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }, 80 * (Array.from(cards).indexOf(e.target) % 3));
+        appear.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  cards.forEach(c => {
+    c.style.opacity = '0';
+    c.style.transform = 'translateY(20px)';
+    c.style.transition = 'opacity 0.5s ease, transform 0.5s ease, border-color 0.2s';
+    appear.observe(c);
+  });
+</script>
+
+</body>
+</html>
