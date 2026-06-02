@@ -78,7 +78,15 @@ Alternatively, open the `/iosApp` folder in Xcode and run from there.
 iOS-specific SwiftUI code also goes in that folder.
 
 ---
+## Landing page
 
+A static landing page for end users is available in `docs/index.html`.  
+It is served via GitHub Pages at `https://lotratemi.github.io/relaunch_front/`  
+(requires the repository to be public and GitHub Pages enabled in Settings → Pages).
+
+It is independent from the mobile app — changes to the landing page do not affect the app code.
+
+---
 ## Screens
 
 The app navigation is managed as a state machine in `App.kt`. The screens in order are:
