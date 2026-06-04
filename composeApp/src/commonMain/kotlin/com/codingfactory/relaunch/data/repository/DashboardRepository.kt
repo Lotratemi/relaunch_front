@@ -9,7 +9,7 @@ class DashboardRepository(private val api: ApiService) {
         api.getObjectivesByUser(userId)
     }
 
-    suspend fun deleteObjective(userId: Long, objectiveId: Long): Result<Unit> = runCatching {
+    suspend fun deleteObjective(userId: Long, objectiveId: Comparable<*>): Result<Unit> = runCatching {
         api.deleteObjective(userId, objectiveId)
     }
 }

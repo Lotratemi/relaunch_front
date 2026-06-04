@@ -16,111 +16,148 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
+import com.codingfactory.relaunch.ui.congrat.CongratFailScreen
+import com.codingfactory.relaunch.ui.congrat.CongratSuccesScreen
 import com.codingfactory.relaunch.ui.theme.*
 
-data class Objective(val id: Int, val title: String, val isCheck: Boolean = false)
+data class Objective(val id: Comparable<*>, val title: String, val isCheck: Boolean = false)
 
 @Composable
 fun DashboardScreen(viewModel: DashboardViewModel) {
     val state by viewModel.uiState.collectAsState()
     var expandedMenuId by remember { mutableStateOf<Int?>(null) }
+    val congratScreen by viewModel.congratScreen
 
-    Scaffold(
-        containerColor = AppBackground,
-        bottomBar = { BottomBar(selectedTab = 0, onTabSelected = {}) }
-    ) { innerPadding ->
-        if (state.isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize().padding(innerPadding),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = OrangeStart)
-            }
-        } else {
-            Column(
-                modifier = Modifier.fillMaxSize().padding(innerPadding)
-                    .verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)
-            ) {
-                Spacer(Modifier.height(16.dp))
 
-                Spacer(Modifier.height(4.dp))
-                Text(text = "Relaunch", color = TextPrimary, fontSize = 34.sp, fontWeight = FontWeight.Bold)
-                Text(text = "Tu peux le faire ${viewModel.userName} !", color = TextPrimary, fontSize = 16.sp)
+    Box(modifier = Modifier.fillMaxSize()) {
 
-                Spacer(Modifier.height(14.dp))
+        Scaffold(
+            containerColor = AppBackground,
+            bottomBar = { BottomBar(selectedTab = 0, onTabSelected = {}) }
+        ) { innerPadding ->
+            if (state.isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(innerPadding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = OrangeStart)
+                }
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(innerPadding)
+                        .verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)
+                ) {
+                    Spacer(Modifier.height(16.dp))
 
-                ProgressBar(objectives = state.objectives)
+                    Spacer(Modifier.height(4.dp))
+                    Text(text = "Relaunch", color = TextPrimary, fontSize = 34.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "Tu peux le faire ${viewModel.userName} !", color = TextPrimary, fontSize = 16.sp)
 
-                Spacer(Modifier.height(28.dp))
+                    Spacer(Modifier.height(14.dp))
 
-                Text(text = "Objectifs clés", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(12.dp))
+                    ProgressBar(objectives = state.objectives)
 
-                state.objectives.forEachIndexed { index, obj ->
-                    val isChecked = obj.isCheck
-                    val isMenuExpanded = expandedMenuId == obj.id
+                    Spacer(Modifier.height(28.dp))
 
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(if (isChecked) brandGradient() else solidSurface())
-                                .clickable { viewModel.toggleObjective(index) }
-                                .padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
+                    Text(text = "Objectifs clés", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(12.dp))
+
+                    state.objectives.forEachIndexed { index, obj ->
+                        val isChecked = obj.isCheck
+                        val isMenuExpanded = expandedMenuId == obj.id
+
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            Row(
                                 modifier = Modifier
-                                    .size(10.dp)
-                                    .clip(CircleShape)
-                                    .background(if (isChecked) Color.White else OrangeStart)
-                            )
-                            Spacer(Modifier.width(12.dp))
-                            Text(text = obj.title, color = (if (isChecked) TextWhite else TextPrimary) , fontSize = 14.sp, modifier = Modifier.weight(1f))
-                            Box {
-                                IconButton(onClick = { expandedMenuId = if (isMenuExpanded) null else obj.id }) {
-                                    Icon(imageVector = Icons.Default.MoreVert, contentDescription = "Options", tint = (if (isChecked) TextWhite else TextPrimary))                              }
-                                DropdownMenu(expanded = isMenuExpanded, onDismissRequest = { expandedMenuId = null }, containerColor = TextWhite) {
-                                    DropdownMenuItem(text = { Text("Modifier") }, onClick = { expandedMenuId = null })
-                                    DropdownMenuItem(
-                                        text = { Text("Supprimer", color = RedEnd ) },
-                                        onClick = {
-                                            expandedMenuId = null
-                                            viewModel.deleteObjective(index)
-                                        }
-                                    )
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(if (isChecked) brandGradient() else solidSurface())
+                                    .clickable { viewModel.toggleObjective(index) }
+                                    .padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(10.dp)
+                                        .clip(CircleShape)
+                                        .background(if (isChecked) Color.White else OrangeStart)
+                                )
+                                Spacer(Modifier.width(12.dp))
+                                Text(text = obj.title, color = (if (isChecked) TextWhite else TextPrimary) , fontSize = 14.sp, modifier = Modifier.weight(1f))
+                                Box {
+                                    IconButton(onClick = { expandedMenuId =
+                                        (if (isMenuExpanded) null else obj.id) as Int?
+                                    }) {
+                                        Icon(imageVector = Icons.Default.MoreVert, contentDescription = "Options", tint = (if (isChecked) TextWhite else TextPrimary))                              }
+                                    DropdownMenu(expanded = isMenuExpanded, onDismissRequest = { expandedMenuId = null }, containerColor = TextWhite) {
+                                        DropdownMenuItem(text = { Text("Modifier") }, onClick = { expandedMenuId = null })
+                                        DropdownMenuItem(
+                                            text = { Text("Supprimer", color = RedEnd ) },
+                                            onClick = {
+                                                expandedMenuId = null
+                                                viewModel.deleteObjective(index)
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
+
+                        Spacer(Modifier.height(8.dp))
                     }
 
                     Spacer(Modifier.height(8.dp))
+                    Button(
+                        onClick = { viewModel.valideCurrentDay() },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = OrangeStart),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
+                        Text("Terminer ma journée", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    Text(
+                        text = "Plus d'objectifs à venir",
+                        color = TextSecondary,
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(Modifier.height(28.dp))
+
+                    Text(text = "Mon suivi", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(12.dp))
+
+                    CalendarView(
+                        month = 4,
+                        year = 2026,
+                        trackedDays = state.trackedDays,
+                        wrongTrackedDays = state.wrongTrackedDays,
+                        objectives = state.objectives
+                    )
+
+                    Spacer(Modifier.height(24.dp))
                 }
+            }
+        }
 
-                Text(
-                    text = "Plus d'objectifs à venir",
-                    color = TextSecondary,
-                    fontSize = 12.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
+        when (congratScreen) {
+            "SUCCESS" -> {
+                CongratSuccesScreen(
+                    onContinueClick = { viewModel.dismissCongratsScreen()}
                 )
-
-                Spacer(Modifier.height(28.dp))
-
-                Text(text = "Mon suivi", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(12.dp))
-
-                CalendarView(
-                    month = 4,
-                    year = 2026,
-                    trackedDays = state.trackedDays,
-                    wrongTrackedDays = state.wrongTrackedDays,
-                    objectives = state.objectives
+            }
+            "FAIL" -> {
+                CongratFailScreen(
+                    onContinueClick = { viewModel.dismissCongratsScreen()}
                 )
-
-                Spacer(Modifier.height(24.dp))
             }
         }
     }
+
 }
