@@ -10,8 +10,8 @@ import kotlinx.coroutines.launch
 
 data class DashboardUiState(
     val objectives: List<Objective> = emptyList(),
-    val trackedDays: Set<Int> = setOf(7, 8, 9, 10, 11, 12, 13, 17),
-    val wrongTrackedDays: Set<Int> = setOf(6, 14, 15, 16),
+    val trackedDays: Set<Int> = emptySet(),
+    val wrongTrackedDays: Set<Int> = emptySet(),
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -20,6 +20,8 @@ class DashboardViewModel(
     private val userId: Long,
     val userName: String
 ) : ViewModel() {
+
+    private val calendarRepo = DashboardRepository(ApiClient.apiService)
 
     private val dashboardRepo = DashboardRepository(ApiClient.apiService)
     private val today = 18
@@ -46,10 +48,21 @@ class DashboardViewModel(
                             isCheck = dto.isCompleted
                         )
                     }
-                    _uiState.update {
-                        it.copy(
+
+                    _uiState.update { state ->
+                        val allChecked = objectives.isNotEmpty() && objectives.all { it.isCheck }
+                        val anyChecked = objectives.any { it.isCheck }
+
+                        val tracked = if (allChecked) state.trackedDays + today else state.trackedDays - today
+                        val wrong = if (allChecked) state.wrongTrackedDays - today
+                        else if (!anyChecked) state.wrongTrackedDays + today
+                        else state.wrongTrackedDays - today
+
+                        state.copy(
                             objectives = objectives,
-                            isLoading = false,
+                            trackedDays = tracked,
+                            wrongTrackedDays = wrong,
+                            isLoading = false
                         )
                     }
                 },
