@@ -6,7 +6,10 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 object ApiClient {
-    var baseUrl: String = "http://10.0.2.2:8080"
+    // Production backend on Render.
+    // For local dev, override at startup: ApiClient.baseUrl = "http://10.0.2.2:8080"
+    // (10.0.2.2 = host machine's localhost as seen from the Android emulator).
+    var baseUrl: String = "https://relaunch-back.onrender.com"
 
     val httpClient by lazy {
         HttpClient {
