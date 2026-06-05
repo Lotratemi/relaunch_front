@@ -1,52 +1,47 @@
 package com.codingfactory.relaunch.ui.dashboard
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.codingfactory.relaunch.data.api.ApiClient
+import com.codingfactory.relaunch.data.model.ObjectiveDto
 import com.codingfactory.relaunch.data.repository.DashboardRepository
-import io.ktor.util.date.WeekDay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 data class DashboardUiState(
     val objectives: List<Objective> = emptyList(),
-    val trackedDays: Set<Int> = emptySet(),
-    val wrongTrackedDays: Set<Int> = emptySet(),
+    val trackedDays: Set<Int> = setOf(7, 8, 9, 10, 11, 12, 13, 17),
+    val wrongTrackedDays: Set<Int> = setOf(6, 14, 15, 16),
     val isLoading: Boolean = true,
     val error: String? = null
-    )
+)
 
 class DashboardViewModel(
     private val userId: Long,
-    val userName: String,
-    private val dashboardRepository: DashboardRepository
+    val userName: String
 ) : ViewModel() {
+
+    private val dashboardRepo = DashboardRepository(ApiClient.apiService)
+    private val today = 18
 
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
-    private val _selectDay = mutableStateOf(1)
-    val selectedDay: State<Int> = _selectDay
-    private val _congratScreen = mutableStateOf<String?>(null)
-    val  congratScreen : State<String?> = _congratScreen
+
+    private val _congratScreen = MutableStateFlow<String?>(null)
+    val congratScreen: StateFlow<String?> = _congratScreen.asStateFlow()
 
     init {
         loadObjectives()
     }
 
-    fun selectDay(day: Int) {
-        _selectDay.value = day
-    }
-
     private fun loadObjectives() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-
-            dashboardRepository.getObjectives(userId).fold(
+            dashboardRepo.getObjectives(userId).fold(
                 onSuccess = { dtos ->
                     val objectives = dtos.mapIndexed { index, dto ->
                         Objective(
-                            id = dto.id ?: (index + 1).toString(),
+                            id = dto.id?.toInt() ?: (index + 1),
                             title = dto.title,
                             isCheck = dto.isCompleted
                         )
@@ -54,7 +49,7 @@ class DashboardViewModel(
                     _uiState.update {
                         it.copy(
                             objectives = objectives,
-                            isLoading = false
+                            isLoading = false,
                         )
                     }
                 },
@@ -72,29 +67,42 @@ class DashboardViewModel(
     }
 
     fun toggleObjective(index: Int) {
+        val currentState = _uiState.value
+        val obj = currentState.objectives[index]
+        val newIsCheck = !obj.isCheck
+
+        viewModelScope.launch {
+            val dto = ObjectiveDto(
+                id = obj.id.toLong(),
+                userId = userId,
+                title = obj.title,
+                endAt = "2026-12-31T23:59:59Z",
+                frequency = 1,
+                isCompleted = newIsCheck
+            )
+            dashboardRepo.updateObjective(userId, obj.id.toLong(), dto)
+        }
+
+
         _uiState.update { state ->
             val updated = state.objectives.toMutableList()
             val obj = updated[index]
-
-            val toggledObj
             updated[index] = obj.copy(isCheck = !obj.isCheck)
-
 
             val allChecked = updated.all { it.isCheck }
             val anyChecked = updated.any { it.isCheck }
-            val currentDay =  _selectDay.value
 
             val tracked = if (allChecked) {
-                state.trackedDays + currentDay
+                state.trackedDays + today
             } else {
-                state.trackedDays - currentDay
+                state.trackedDays - today
             }
             val wrong = if (allChecked) {
-                state.wrongTrackedDays - currentDay
+                state.wrongTrackedDays - today
             } else if (!anyChecked) {
-                state.wrongTrackedDays + currentDay
+                state.wrongTrackedDays + today
             } else {
-                state.wrongTrackedDays - currentDay
+                state.wrongTrackedDays - today
             }
 
             state.copy(
@@ -105,28 +113,27 @@ class DashboardViewModel(
         }
     }
 
-    fun deleteObjective(index: Int) {
-        val obj = _uiState.value.objectives.getOrNull(index) ?: return
-        viewModelScope.launch {
-            dashboardRepository.deleteObjective(userId, obj.id)
-        }
-        _uiState.update { state ->
-            state.copy(objectives = state.objectives.toMutableList().also { it.removeAt(index) })
-        }
-    }
-
-    fun valideCurrentDay (){
-        val currentObjectives = _uiState.value.objectives
-        if (currentObjectives.isEmpty()) {
+    fun validateCurrentDay() {
+        val currentObj = _uiState.value.objectives
+        if (currentObj.isEmpty()){
             _congratScreen.value = "FAIL"
             return
         }
-
-        val allCompleted = currentObjectives.all { it.isCheck }
+        val allCompleted = currentObj.all { it.isCheck }
         if (allCompleted) {
             _congratScreen.value = "SUCCESS"
         } else {
             _congratScreen.value = "FAIL"
+        }
+    }
+
+    fun deleteObjective(index: Int) {
+        val obj = _uiState.value.objectives.getOrNull(index) ?: return
+        viewModelScope.launch {
+            dashboardRepo.deleteObjective(userId, obj.id.toLong())
+        }
+        _uiState.update { state ->
+            state.copy(objectives = state.objectives.toMutableList().also { it.removeAt(index) })
         }
     }
 

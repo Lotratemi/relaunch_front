@@ -4,7 +4,6 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.*
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -16,21 +15,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
-import com.codingfactory.relaunch.ui.congrat.CongratFailScreen
-import com.codingfactory.relaunch.ui.congrat.CongratSuccesScreen
 import com.codingfactory.relaunch.ui.theme.*
+import com.codingfactory.relaunch.ui.congrat.CongratSuccesScreen
+import com.codingfactory.relaunch.ui.congrat.CongratFailScreen
 
-data class Objective(val id: Comparable<*>, val title: String, val isCheck: Boolean = false)
+data class Objective(val id: Int, val title: String, val isCheck: Boolean = false)
 
 @Composable
 fun DashboardScreen(viewModel: DashboardViewModel) {
     val state by viewModel.uiState.collectAsState()
+    val congratScreen by viewModel.congratScreen.collectAsState()
     var expandedMenuId by remember { mutableStateOf<Int?>(null) }
-    val congratScreen by viewModel.congratScreen
-
 
     Box(modifier = Modifier.fillMaxSize()) {
-
         Scaffold(
             containerColor = AppBackground,
             bottomBar = { BottomBar(selectedTab = 0, onTabSelected = {}) }
@@ -85,9 +82,7 @@ fun DashboardScreen(viewModel: DashboardViewModel) {
                                 Spacer(Modifier.width(12.dp))
                                 Text(text = obj.title, color = (if (isChecked) TextWhite else TextPrimary) , fontSize = 14.sp, modifier = Modifier.weight(1f))
                                 Box {
-                                    IconButton(onClick = { expandedMenuId =
-                                        (if (isMenuExpanded) null else obj.id) as Int?
-                                    }) {
+                                    IconButton(onClick = { expandedMenuId = if (isMenuExpanded) null else obj.id }) {
                                         Icon(imageVector = Icons.Default.MoreVert, contentDescription = "Options", tint = (if (isChecked) TextWhite else TextPrimary))                              }
                                     DropdownMenu(expanded = isMenuExpanded, onDismissRequest = { expandedMenuId = null }, containerColor = TextWhite) {
                                         DropdownMenuItem(text = { Text("Modifier") }, onClick = { expandedMenuId = null })
@@ -108,10 +103,8 @@ fun DashboardScreen(viewModel: DashboardViewModel) {
 
                     Spacer(Modifier.height(8.dp))
                     Button(
-                        onClick = { viewModel.valideCurrentDay() },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
+                        onClick = { viewModel.validateCurrentDay() },
+                        modifier = Modifier.fillMaxWidth().height(50.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = OrangeStart),
                         shape = RoundedCornerShape(14.dp)
                     ) {
@@ -147,17 +140,8 @@ fun DashboardScreen(viewModel: DashboardViewModel) {
         }
 
         when (congratScreen) {
-            "SUCCESS" -> {
-                CongratSuccesScreen(
-                    onContinueClick = { viewModel.dismissCongratsScreen()}
-                )
-            }
-            "FAIL" -> {
-                CongratFailScreen(
-                    onContinueClick = { viewModel.dismissCongratsScreen()}
-                )
-            }
+            "SUCCESS" -> CongratSuccesScreen(onContinueClick = { viewModel.dismissCongratsScreen() })
+            "FAIL" -> CongratFailScreen(onContinueClick = { viewModel.dismissCongratsScreen() })
         }
     }
-
 }

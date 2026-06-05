@@ -28,7 +28,8 @@ data class ObjectiveDto(
     @SerialName("end_at") val endAt: String,
     val frequency: Long,
     val title: String,
-    val description: String? = null
+    val description: String? = null,
+    @SerialName("is_completed") val isCompleted: Boolean = false,
 )
 
 @Serializable

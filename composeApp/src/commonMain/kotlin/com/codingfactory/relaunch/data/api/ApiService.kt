@@ -58,7 +58,7 @@ class ApiService(private val client: HttpClient, private val baseUrl: String) {
             setBody(objective)
         }.body()
 
-    suspend fun deleteObjective(userId: Long, objectiveId: Comparable<*>) {
+    suspend fun deleteObjective(userId: Long, objectiveId: Long) {
         client.delete("$baseUrl/objectives/$userId/$objectiveId")
     }
 
