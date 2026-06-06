@@ -64,7 +64,9 @@ class DashboardViewModel(
                         Objective(
                             id = dto.id?.toInt() ?: (index + 1),
                             title = dto.title,
-                            isCheck = dto.isCompleted
+                            isCheck = dto.isCompleted,
+                            endAt = dto.endAt,
+                            frequency = dto.frequency
                         )
                     }
 
@@ -110,8 +112,8 @@ class DashboardViewModel(
                 id = obj.id.toLong(),
                 userId = userId,
                 title = obj.title,
-                endAt = "2026-12-31T23:59:59Z",
-                frequency = 1,
+                endAt = obj.endAt,
+                frequency = obj.frequency,
                 isCompleted = newIsCheck
             )
             dashboardRepo.updateObjective(userId, obj.id.toLong(), dto)

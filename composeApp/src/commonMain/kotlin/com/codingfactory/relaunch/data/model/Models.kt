@@ -26,7 +26,7 @@ data class ObjectiveDto(
     @SerialName("user_id") val userId: Long? = null,
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("end_at") val endAt: String,
-    val frequency: Long,
+    val frequency: Int,
     val title: String,
     val description: String? = null,
     @SerialName("is_completed") val isCompleted: Boolean = false,

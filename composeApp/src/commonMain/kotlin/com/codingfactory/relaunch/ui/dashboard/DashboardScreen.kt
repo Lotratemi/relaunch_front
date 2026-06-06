@@ -19,7 +19,7 @@ import com.codingfactory.relaunch.ui.theme.*
 import com.codingfactory.relaunch.ui.congrat.CongratSuccesScreen
 import com.codingfactory.relaunch.ui.congrat.CongratFailScreen
 
-data class Objective(val id: Int, val title: String, val isCheck: Boolean = false)
+data class Objective(val id: Int, val title: String, val isCheck: Boolean = false, val endAt: String = "", val frequency: Int = 1 )
 
 @Composable
 fun DashboardScreen(viewModel: DashboardViewModel) {
