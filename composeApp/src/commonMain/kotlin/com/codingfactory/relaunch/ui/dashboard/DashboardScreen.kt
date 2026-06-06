@@ -101,37 +101,18 @@ fun DashboardScreen(viewModel: DashboardViewModel) {
                         Spacer(Modifier.height(8.dp))
                     }
 
-                    Spacer(Modifier.height(8.dp))
-                    Button(
-                        onClick = { viewModel.validateCurrentDay() },
-                        modifier = Modifier.fillMaxWidth().height(50.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = OrangeStart),
-                        shape = RoundedCornerShape(14.dp)
-                    ) {
-                        Text("Terminer ma journée", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                    }
-
-                    Spacer(Modifier.height(16.dp))
-
-                    Text(
-                        text = "Plus d'objectifs à venir",
-                        color = TextSecondary,
-                        fontSize = 12.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
                     Spacer(Modifier.height(28.dp))
 
                     Text(text = "Mon suivi", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(12.dp))
 
                     CalendarView(
-                        month = 4,
-                        year = 2026,
+                        month = state.displayedMonth,
+                        year = state.displayedYear,
                         trackedDays = state.trackedDays,
                         wrongTrackedDays = state.wrongTrackedDays,
-                        objectives = state.objectives
+                        objectives = state.objectives,
+                        today = state.currentDay,
                     )
 
                     Spacer(Modifier.height(24.dp))

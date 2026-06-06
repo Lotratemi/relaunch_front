@@ -46,7 +46,7 @@ fun CongratFailScreen(onContinueClick: () -> Unit) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Courage !",
+                    text = "Tu peux le faire !",
                     fontWeight = FontWeight.ExtraBold,
                     color = OrangeStart, // Utilise ton orange
                     fontSize = 32.sp,
@@ -72,11 +72,11 @@ fun CongratFailScreen(onContinueClick: () -> Unit) {
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                shape = RoundedCornerShape(50.dp), // Bouton très arrondi
+                shape = RoundedCornerShape(50.dp),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
             ) {
                 Text(
-                    text = "Suivant",
+                    text = "Courage !",
                     color = RedEnd,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold

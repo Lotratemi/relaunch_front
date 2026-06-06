@@ -1,3 +1,4 @@
+@file:OptIn(kotlin.time.ExperimentalTime::class)
 package com.codingfactory.relaunch.ui.dashboard
 
 import androidx.lifecycle.ViewModel
@@ -7,11 +8,17 @@ import com.codingfactory.relaunch.data.model.ObjectiveDto
 import com.codingfactory.relaunch.data.repository.DashboardRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlin.time.Clock
+
+private val _timeString = Clock.System.now().toString()
 
 data class DashboardUiState(
     val objectives: List<Objective> = emptyList(),
     val trackedDays: Set<Int> = emptySet(),
     val wrongTrackedDays: Set<Int> = emptySet(),
+    val displayedMonth: Int = _timeString.substring(5, 7).toInt(),
+    val displayedYear: Int = _timeString.substring(0, 4).toInt(),
+    val currentDay: Int = _timeString.substring(8, 10).toInt(),
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -21,11 +28,8 @@ class DashboardViewModel(
     val userName: String
 ) : ViewModel() {
 
-    private val calendarRepo = DashboardRepository(ApiClient.apiService)
-
+    private val todayDay: Int = _timeString.substring(8, 10).toInt()
     private val dashboardRepo = DashboardRepository(ApiClient.apiService)
-    private val today = 18
-
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
@@ -33,7 +37,22 @@ class DashboardViewModel(
     val congratScreen: StateFlow<String?> = _congratScreen.asStateFlow()
 
     init {
+        checkYestardayStatus()
         loadObjectives()
+    }
+
+    private fun checkYestardayStatus(){
+        val lastOpenedDay = dashboardRepo.getLastOpenedDay()
+        val wasLastDayCompleted = dashboardRepo.disappointedStatus()
+
+        if (lastOpenedDay != 0 && lastOpenedDay != todayDay) {
+            if (!wasLastDayCompleted){
+                _congratScreen.value = "FAIL"
+            }
+        }
+
+        dashboardRepo.saveLastOpenedDay(todayDay)
+        dashboardRepo.saveDayCompletionStatus(false)
     }
 
     private fun loadObjectives() {
@@ -53,10 +72,12 @@ class DashboardViewModel(
                         val allChecked = objectives.isNotEmpty() && objectives.all { it.isCheck }
                         val anyChecked = objectives.any { it.isCheck }
 
-                        val tracked = if (allChecked) state.trackedDays + today else state.trackedDays - today
-                        val wrong = if (allChecked) state.wrongTrackedDays - today
-                        else if (!anyChecked) state.wrongTrackedDays + today
-                        else state.wrongTrackedDays - today
+                        val tracked = if (allChecked) state.trackedDays + todayDay else state.trackedDays - todayDay
+                        val wrong = if (allChecked) state.wrongTrackedDays - todayDay
+                        else if (!anyChecked) state.wrongTrackedDays + todayDay
+                        else state.wrongTrackedDays - todayDay
+
+                        dashboardRepo.saveDayCompletionStatus(allChecked)
 
                         state.copy(
                             objectives = objectives,
@@ -96,26 +117,31 @@ class DashboardViewModel(
             dashboardRepo.updateObjective(userId, obj.id.toLong(), dto)
         }
 
-
         _uiState.update { state ->
             val updated = state.objectives.toMutableList()
             val obj = updated[index]
             updated[index] = obj.copy(isCheck = !obj.isCheck)
 
-            val allChecked = updated.all { it.isCheck }
+            val allChecked = updated.isNotEmpty() && updated.all { it.isCheck }
             val anyChecked = updated.any { it.isCheck }
 
+            if (allChecked && !state.trackedDays.contains(todayDay)){
+                _congratScreen.value = "SUCCESS"
+            }
+
+            dashboardRepo.saveDayCompletionStatus(allChecked)
+
             val tracked = if (allChecked) {
-                state.trackedDays + today
+                state.trackedDays + todayDay
             } else {
-                state.trackedDays - today
+                state.trackedDays - todayDay
             }
             val wrong = if (allChecked) {
-                state.wrongTrackedDays - today
+                state.wrongTrackedDays - todayDay
             } else if (!anyChecked) {
-                state.wrongTrackedDays + today
+                state.wrongTrackedDays + todayDay
             } else {
-                state.wrongTrackedDays - today
+                state.wrongTrackedDays - todayDay
             }
 
             state.copy(
@@ -126,19 +152,19 @@ class DashboardViewModel(
         }
     }
 
-    fun validateCurrentDay() {
-        val currentObj = _uiState.value.objectives
-        if (currentObj.isEmpty()){
-            _congratScreen.value = "FAIL"
-            return
-        }
-        val allCompleted = currentObj.all { it.isCheck }
-        if (allCompleted) {
-            _congratScreen.value = "SUCCESS"
-        } else {
-            _congratScreen.value = "FAIL"
-        }
-    }
+    //fun validateCurrentDay() {
+    //    val currentObj = _uiState.value.objectives
+    //    if (currentObj.isEmpty()){
+    //        _congratScreen.value = "FAIL"
+    //        return
+    //    }
+    //    val allCompleted = currentObj.all { it.isCheck }
+    //    if (allCompleted) {
+    //        _congratScreen.value = "SUCCESS"
+    //    } else {
+    //        _congratScreen.value = "FAIL"
+    //  }
+    //}
 
     fun deleteObjective(index: Int) {
         val obj = _uiState.value.objectives.getOrNull(index) ?: return
