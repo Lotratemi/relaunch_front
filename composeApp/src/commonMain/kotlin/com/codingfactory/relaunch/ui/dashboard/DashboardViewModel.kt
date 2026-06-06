@@ -154,20 +154,6 @@ class DashboardViewModel(
         }
     }
 
-    //fun validateCurrentDay() {
-    //    val currentObj = _uiState.value.objectives
-    //    if (currentObj.isEmpty()){
-    //        _congratScreen.value = "FAIL"
-    //        return
-    //    }
-    //    val allCompleted = currentObj.all { it.isCheck }
-    //    if (allCompleted) {
-    //        _congratScreen.value = "SUCCESS"
-    //    } else {
-    //        _congratScreen.value = "FAIL"
-    //  }
-    //}
-
     fun deleteObjective(index: Int) {
         val obj = _uiState.value.objectives.getOrNull(index) ?: return
         viewModelScope.launch {

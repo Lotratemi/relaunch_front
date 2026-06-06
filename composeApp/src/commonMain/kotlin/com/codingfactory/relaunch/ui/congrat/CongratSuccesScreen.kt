@@ -64,7 +64,6 @@ fun CongratSuccesScreen(onContinueClick: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 🔥 Texte qui fait le lien avec ce que l'utilisateur vient de faire
             Text(
                 text = "Objectifs terminés.\nTon calendrier a été mis à jour !",
                 color = Color.White,
@@ -74,10 +73,6 @@ fun CongratSuccesScreen(onContinueClick: () -> Unit) {
                 lineHeight = 28.sp,
                 modifier = Modifier.fillMaxWidth(0.9f)
             )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // DaysOfWeekRow()
 
             Spacer(modifier = Modifier.height(48.dp))
 

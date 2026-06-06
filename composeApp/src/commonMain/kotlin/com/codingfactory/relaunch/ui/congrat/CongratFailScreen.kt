@@ -32,7 +32,7 @@ fun CongratFailScreen(onContinueClick: () -> Unit) {
                 modifier = Modifier
                     .size(200.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.2f)), // Effet de halo
+                    .background(Color.White.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
                 Text("Avatar ici", color = Color.White)
