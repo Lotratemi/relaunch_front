@@ -3,6 +3,8 @@ package com.codingfactory.relaunch.ui.congrat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.*
@@ -30,12 +32,17 @@ fun CongratSuccesScreen(onContinueClick: () -> Unit) {
 
             Box(
                 modifier = Modifier
-                    .size(200.dp)
+                    .size(160.dp)
                     .clip(CircleShape)
                     .background(Color.White.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Avatar ici", color = Color.White)
+                Icon(
+                    imageVector = Icons.Rounded.CheckCircle,
+                    contentDescription = "Succès",
+                    tint = Color.White,
+                    modifier = Modifier.size(80.dp)
+                )
             }
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -48,27 +55,24 @@ fun CongratSuccesScreen(onContinueClick: () -> Unit) {
                 Text(
                     text = "Félicitations !",
                     fontWeight = FontWeight.ExtraBold,
-                    color = OrangeStart, // Utilise ton orange
+                    color = OrangeStart,
                     fontSize = 32.sp,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(vertical = 8.dp)
+                    modifier = Modifier.padding(vertical = 12.dp) // Un peu plus d'air
                 )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Tu as accompli tes objectifs !",
+                text = "Objectifs terminés.\nTon calendrier a été mis à jour !",
                 color = Color.White,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(0.8f)
+                lineHeight = 28.sp,
+                modifier = Modifier.fillMaxWidth(0.9f)
             )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            DaysOfWeekRow()
 
             Spacer(modifier = Modifier.height(48.dp))
 
@@ -78,11 +82,11 @@ fun CongratSuccesScreen(onContinueClick: () -> Unit) {
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                shape = RoundedCornerShape(50.dp), // Bouton très arrondi
+                shape = RoundedCornerShape(50.dp),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
             ) {
                 Text(
-                    text = "Suivant",
+                    text = "Génial !",
                     color = RedEnd,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold

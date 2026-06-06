@@ -10,6 +10,7 @@ object ApiClient {
     // For local dev, override at startup: ApiClient.baseUrl = "http://10.0.2.2:8080"
     // (10.0.2.2 = host machine's localhost as seen from the Android emulator).
     var baseUrl: String = "https://relaunch-back.onrender.com"
+    // var baseUrl: String = "http://10.0.2.2:8080"
 
     val httpClient by lazy {
         HttpClient {

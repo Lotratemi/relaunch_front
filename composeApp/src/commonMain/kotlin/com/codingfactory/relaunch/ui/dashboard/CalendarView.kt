@@ -98,7 +98,10 @@ internal fun CalendarView(month: Int, year: Int, trackedDays: Set<Int>, wrongTra
 internal fun firstDayOfWeek(month: Int, year: Int): Int {
     val t = intArrayOf(0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4)
     val y = if (month < 3) year - 1 else year
-    return (y + y / 4 - y / 100 + y / 400 + t[month - 1] + 1) % 7
+
+    val rawDay = (y + y / 4 - y / 100 + y / 400 + t[month - 1] + 1) % 7
+
+    return (rawDay + 6) % 7
 }
 
 @Composable
