@@ -97,6 +97,7 @@ fun DashboardScreen(viewModel: DashboardViewModel) {
                                 }
                             }
                         }
+                        Spacer(Modifier.height(10.dp))
                     }
 
                     Spacer(Modifier.height(28.dp))
